@@ -1,9 +1,9 @@
 require 'socket'
 require 'thread'
-require './app.rb'
-
+require './app'
 include Socket::Constants
-ESCAPE_CHAR = 'q'
+
+#configure socket and port/host
 socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 if (ENV["PORT"])
     port = ENV["PORT"]
@@ -12,15 +12,16 @@ else
     port = ARGV[0] || 3000
     host = ARGV[1] || 'localhost'
 end
-
 sockaddress = Socket.pack_sockaddr_in(port,host )
 
+#bind and listen
 socket.bind(sockaddress)
 listen = socket.listen(5)
 
 p "socket bound and listening on #{[host,port]}"
 
-connections = []
+# init rack app
+app = App_maker.new.make
 while(true) do
 p 'waiting for connection'
     Thread.start(socket.accept) do |connection| 
