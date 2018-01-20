@@ -1,1 +1,1 @@
-ruby server.rb
+web: rake tcpserver.rb
