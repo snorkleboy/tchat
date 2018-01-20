@@ -3,20 +3,15 @@ require 'thread'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
 socket = Socket.new(AF_INET, SOCK_STREAM, 0)
-# pack_sockaddr_in(80, 'example.com')
-p ENV
-p ""
-p ARGV[0]
-p ''
+
 port = ENV["PORT"] || ARGV[0] || 3000
-p port
-sockaddress = Socket.pack_sockaddr_in(port || ENV["address"] || 'localhost')
+host = ARGV[1] || ENV["address"] || 'localhost'
+sockaddress = Socket.pack_sockaddr_in(port, )
+
 socket.bind(sockaddress)
 listen = socket.listen(5)
 
-p "socket bound and listening on #{ARGV[0] || ENV["port"] || 9876}, #{ARGV[1] || ENV["address"] || 'localhost'}"
-p listen
-# p ENV
+p "socket bound and listening on #{[host,port]}"
 
 connections = []
 while(true) do
