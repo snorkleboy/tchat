@@ -1,6 +1,6 @@
 require 'faye/websocket'
 
-module ChatDemo
+module Chat
   class ChatBackend
     KEEPALIVE_TIME = 15 # in seconds
 
@@ -10,6 +10,7 @@ module ChatDemo
     end
 
     def call(env)
+        puts 'in WS middleware'
         if Faye::WebSocket.websocket?(env)
             ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
 
