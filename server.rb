@@ -6,8 +6,11 @@ socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 # pack_sockaddr_in(80, 'example.com')
 p ENV
 p ""
-p ENV["PORT"]
-sockaddress = Socket.pack_sockaddr_in(ARGV[0] || ENV["PORT"] || 9876, ARGV[1] || ENV["address"] || 'localhost')
+p ARGV[0]
+p ''
+port = ENV["PORT"] || ARGV[0] || 3000
+p port
+sockaddress = Socket.pack_sockaddr_in(port || ENV["address"] || 'localhost')
 socket.bind(sockaddress)
 listen = socket.listen(5)
 
