@@ -6,7 +6,7 @@ socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 
 port = ENV["PORT"] || ARGV[0] || 3000
 host = ARGV[1] || ENV["address"] || 'localhost'
-host = 'https://tcpchater.herokuapp.com/'
+host = '127.0.0.1'
 
 sockaddress = Socket.pack_sockaddr_in(port,host )
 
@@ -22,10 +22,7 @@ p 'waiting for connection'
         p "server accepted :#{connection}"
         client = connection[0]
         # p client.methods
-       while(!client.closed?)
-        msg = client.gets
-        puts msg
-       end
+        client.puts"hello"
        client.close()
        p 'client closed'
     end
