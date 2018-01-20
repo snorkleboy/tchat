@@ -6,7 +6,8 @@ socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 
 port = ENV["PORT"] || ARGV[0] || 3000
 host = ARGV[1] || ENV["address"] || 'localhost'
-host = `heroku info -s | grep web_url | cut -d= -f2`
+host = 'https://tcpchater.herokuapp.com/'
+
 sockaddress = Socket.pack_sockaddr_in(port,host )
 
 socket.bind(sockaddress)
