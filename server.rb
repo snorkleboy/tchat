@@ -3,7 +3,6 @@ require 'thread'
 require './app'
 include Socket::Constants
 
-require 'rack/lobster'
 
 
 #configure socket and port/host
@@ -25,7 +24,7 @@ p "socket bound and listening on #{[host,port]}"
 
 # init rack app
 
-app = Rack::Lobster.new
+app = App.new
 p app
 p app.call({})
 # app = App_maker.new.make
