@@ -5,6 +5,8 @@ ESCAPE_CHAR = 'q'
 socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 # pack_sockaddr_in(80, 'example.com')
 p ENV
+p ""
+p ENV["PORT"]
 sockaddress = Socket.pack_sockaddr_in(ARGV[0] || ENV["PORT"] || 9876, ARGV[1] || ENV["address"] || 'localhost')
 socket.bind(sockaddress)
 listen = socket.listen(5)
