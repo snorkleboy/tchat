@@ -3,6 +3,9 @@ require 'thread'
 require './app'
 include Socket::Constants
 
+require 'rack/lobster'
+
+
 #configure socket and port/host
 socket = Socket.new(AF_INET, SOCK_STREAM, 0)
 if (ENV["PORT"])
@@ -21,7 +24,11 @@ listen = socket.listen(5)
 p "socket bound and listening on #{[host,port]}"
 
 # init rack app
-app = App_maker.new.make
+
+app = Rack::Lobster.new
+p app
+p app.call({})
+# app = App_maker.new.make
 while(true) do
 p 'waiting for connection'
     Thread.start(socket.accept) do |connection| 
