@@ -12,11 +12,15 @@ module Chat
     def call(env)
         puts 'in WS middleware'
         if Faye::WebSocket.websocket?(env)
+            puts 'websocket? == true'
             ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
 
             ws.on :open do |event|
                 p ['websocket connection opened', ws.object_id]
                 @clients << ws
+                ws.send(:text=>"hello")
+                p 'clients connected:'
+                p @clients.count
             end
 
             ws.on :message do |event|
@@ -32,6 +36,8 @@ module Chat
 
             ws.rack_response
         else
+            puts 'websocket == false'
+            puts 'exiting websocket middleware'
             @app.call(env)
         end
     end
