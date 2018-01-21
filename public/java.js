@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const input = document.getElementById('chatin');
     const messageBox = document.getElementById('messageBox');
 
-    const scheme = "ws://";
+    const scheme = "wss://";
     const uri = scheme + window.document.location.host + "/";
     const ws = new WebSocket(uri);
 
