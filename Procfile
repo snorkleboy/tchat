@@ -1,1 +1,1 @@
-Web: rackup config.ru -E production
+Web: rackup config.ru 
