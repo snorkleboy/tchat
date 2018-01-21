@@ -1,6 +1,6 @@
 require 'socket'
 require 'thread'
-require './app'
+# require './app'
 include Socket::Constants
 
 
@@ -11,7 +11,7 @@ if (ENV["PORT"])
     port = ENV["PORT"]
     host = '0.0.0.0'
 else
-    port = ARGV[0] || 3000
+    port = ARGV[0] || 3001
     host = ARGV[1] || 'localhost'
 end
 sockaddress = Socket.pack_sockaddr_in(port,host )
@@ -24,9 +24,9 @@ p "socket bound and listening on #{[host,port]}"
 
 # init rack app
 
-app = App.new
-p app
-p app.call({})
+# app = App.new
+# p app
+# p app.call({})
 # app = App_maker.new.make
 while(true) do
 p 'waiting for connection'
@@ -34,7 +34,7 @@ p 'waiting for connection'
         client = connection[0]
         request = client.gets
         puts request
-        status, headers, body = app.call({})
+        status, headers, body = ['200', {'Content-Type' => 'text/html'}, ["Hello world! this is a 'rack' app and The time is #{Time.now}"]]
 
         # HTTP:STATUS
         client.print "HTTP/1.1 #{status}\r\n"
