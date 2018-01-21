@@ -7,4 +7,3 @@ end
 
 gem 'rack'
 gem 'faye-websocket'
-gem 'rack/lobster'
