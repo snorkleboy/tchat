@@ -7,3 +7,4 @@ end
 
 gem 'rack'
 gem 'faye-websocket'
+gem 'puma'
