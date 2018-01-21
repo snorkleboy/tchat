@@ -34,8 +34,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         console.log('websocket opening',e);
     };
 
-
-    
     subBtn.addEventListener('click',(e)=>{
         
         e.preventDefault();
@@ -45,6 +43,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         console.log('submit clicked', handle, text);
 
         ws.send(JSON.stringify({
+            room:0,
             handle:handle,
             text:text
         }));

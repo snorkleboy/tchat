@@ -7,6 +7,7 @@ module Chat
     def initialize(app)
       @app     = app
       @clients = []
+    #   @rooms = {0=>[]}
     end
 
     def call(env)
@@ -18,7 +19,6 @@ module Chat
             ws.on :open do |event|
                 p ['websocket connection opened', ws.object_id]
                 @clients << ws
-                ws.send(:text=>"hello")
                 p 'clients connected:'
                 p @clients.count
             end
