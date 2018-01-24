@@ -15,7 +15,6 @@ class SisterServer
             Thread.new(@SisterSocket.accept) do |connection| 
                 @client = connection[0]
                 p "SISTER SERVER ACCEPTED :#{connection}"
-                p "HERHERHERHERH"
                 listen(proc)
             end
         }
@@ -33,9 +32,6 @@ class SisterServer
     def send(msg)
         p "sister server puts #{msg}"
         @client.puts(msg)
-
-        "{\"room\":0,\"handle\":\"brwser│tim: hi bob
-\",\"text\":\"est\"}"
     end
 
 end
