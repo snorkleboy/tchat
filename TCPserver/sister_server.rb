@@ -54,15 +54,23 @@ class SisterClient
         @port = port
         @host = host
         @socket = nil
+        @connected = false
     end
 
 
     def open(proc)
-        
-        @socket = TCPSocket.open(@host, @port)
-        Thread.new(){
-            listen(proc)
-        }
+        begin
+            @socket = TCPSocket.open(@host, @port)
+            Thread.new(){
+                @connected = true
+                listen(proc)
+            } 
+        rescue => exception
+            puts 'couldnt connect to sister server'
+            p exception
+            @connected = false
+        end
+
     end
 
     def listen(proc)
@@ -75,8 +83,12 @@ class SisterClient
     end
 
     def send(msg)
-        p "sister client puts #{msg}"
-        @socket.puts(msg)
+        if (@connected)
+            p "sister client puts #{msg}"
+            @socket.puts(msg)
+        else
+            p 'not connected to sister client'
+        end
     end
 
 end

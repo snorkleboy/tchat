@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
 
-<script src="java.js"></script>
+    <script src="WS.js"></script>
+    <link rel="stylesheet" href="index.css">
+
     <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
@@ -11,15 +13,21 @@
 </head>
 <body>
     <h1>hello world, this is a rack app</h1>
-
-    <div id='msgs'>
-        <ul id='messageBox'>
-            <li><h1>WELCOME TO THE WEEDS</h1></li>
-        </ul>
+    <div class='appholder'>
+        <div class='messageholder' id='msgs'>
+            <ul id='messageBox'>
+                <li>
+                    <img src='https://image.freepik.com/free-photo/cute-cat-picture_1122-449.jpg'/>
+                    <h1>this is some sample text</h1>
+                </li>
+            </ul>
+        </div>
+        <div class='buttons'>
+            <input id='handle' type="text" placeholder="Enter name here" autofocus>
+            <input id='chatin' type="text" placeholder="Enter chat text here!" autofocus>
+            <button id='submit' type='submit'></button>
+        </div>
+        
     </div>
-    <input id='handle' type="text" placeholder="Enter name here" autofocus>
-    <input id='chatin' type="text"  placeholder="Enter chat text here!" autofocus>
-    <button id='submit' type='submit'></button>
-
 </body>
 </html>

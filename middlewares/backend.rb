@@ -10,8 +10,6 @@ module Chat
       @clients = []
       @sisterClient = SisterClient.new(9001,'localhost')
       @msgAllProc = Proc.new{|msg| @clients.each{|client| client.send(msg) }}
-      p 'here1'
-      puts "here2"
       begin
           @sisterClient.open(@msgAllProc)
       rescue => exception
@@ -21,9 +19,7 @@ module Chat
     end
 
     def call(env)
-        puts 'in WS middleware'
         if Faye::WebSocket.websocket?(env)
-            puts 'websocket? == true'
             ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
 
             ws.on :open do |event|
@@ -47,8 +43,6 @@ module Chat
 
             ws.rack_response
         else
-            puts 'websocket == false'
-            puts 'exiting websocket middleware'
             @app.call(env)
         end
     end

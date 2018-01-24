@@ -1,0 +1,38 @@
+body{
+    /* font-size: 100px; */
+}
+
+.appholder{
+    height: 80vh;
+    width: 80vw;
+    background-color: darkblue;
+        display: flex;
+    align-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.messageholder{
+    background-color: aliceblue;
+    height: 90%;
+    width: 90%;
+
+
+}
+.messageholder ul{
+    height: 100%;
+}
+.messageholder li{
+    display: flex;
+    height: 10%;
+    width: 100%;
+}
+.messageholder li img{
+    object-fit: cover;
+    max-width: 100px;
+}
+.messageBox{
+    background-color: wheat;
+
+}
+
