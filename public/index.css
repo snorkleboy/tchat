@@ -16,16 +16,18 @@ body{
     background-color: aliceblue;
     height: 90%;
     width: 90%;
+    margin: 10px;
 
 
 }
 .messageholder ul{
-    height: 100%;
+    /* height: 100%; */
 }
 .messageholder li{
     display: flex;
     height: 10%;
     width: 100%;
+    padding: 15px;
 }
 .messageholder li img{
     object-fit: cover;
@@ -36,3 +38,16 @@ body{
 
 }
 
+
+.buttons{
+    display: block;
+}
+#submit{
+    /* display: block; */
+    background-color: whitesmoke;
+    width: 100px;
+    height: 50px;
+}
+input{
+    background-color: whitesmoke;
+}
