@@ -23,8 +23,8 @@ class SisterServer
 
     def listen(proc)
         p "sisterserver listen start, proc=#{proc}"
-        while (true)
-            msg = @client.gets
+        while (msg = @client.gets)
+            
             p "sisterserver listen #{msg}"
             proc.call(msg)
         end
@@ -33,6 +33,9 @@ class SisterServer
     def send(msg)
         p "sister server puts #{msg}"
         @client.puts(msg)
+
+        "{\"room\":0,\"handle\":\"brwser│tim: hi bob
+\",\"text\":\"est\"}"
     end
 
 end
@@ -61,6 +64,7 @@ class SisterClient
         p "sister client start listen, proc= #{proc}"
         while (true)
             msg = socket.gets
+            p "sister client received #{msg}"
             proc.call(msg)
         end
     end

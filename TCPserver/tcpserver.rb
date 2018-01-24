@@ -3,6 +3,7 @@
 require 'socket'
 require 'thread'
 require './sister_server'
+require 'json'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
 User = Struct.new(:client, :name, :address)
@@ -13,7 +14,7 @@ class Server
         @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         @sisterServer = SisterServer.new(9001,'localhost')
-        @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts(msg)}}
+        @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{JSON.parse(msg)['handle']}: #{JSON.parse(msg)['text']}" )}}
         @sisterServer.start(@messageallProc)
         sockaddress = Socket.pack_sockaddr_in(port,host)
         
@@ -37,8 +38,7 @@ class Server
                 begin
                     # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
                     # if its not HTTP it welcomes to TCPChat and asks for a user name, then returns a userStruct(@socket,name)
-                    user = handshake(connection)    
-                    @messageallProc.call("message")
+                    user = handshake(connection)   
                     puts user     
                 rescue => exception
                     p "handshake rescue: #{exception}"
@@ -81,11 +81,10 @@ class Server
     def read(user)
         loop {
             msg = user[:client].gets.chomp
-            msg = "#{user[:name]}: #{msg}"
-            puts msg
+            puts "#{user[:name]}: #{msg}"
             begin
-                write_all(msg, user)
-                @sisterServer.send("#{msg}")
+                write_all("#{user[:name]}: #{msg}", user)
+                @sisterServer.send(JSON.generate({'handle'=>user[:name],'text'=>msg}))
             rescue => exception
                 p "write error #{exception}"
             end
