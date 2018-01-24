@@ -1,4 +1,5 @@
 require 'faye/websocket'
+require_relative "../TCPserver/sister_server"
 
 module Chat
   class ChatBackend
@@ -7,7 +8,16 @@ module Chat
     def initialize(app)
       @app     = app
       @clients = []
-    #   @rooms = {0=>[]}
+      @sisterClient = SisterClient.new(9001,'localhost')
+      @msgAllProc = Proc.new{|msg| @clients.each{|client| client.send(msg) }}
+      p 'here1'
+      puts "here2"
+      begin
+          @sisterClient.open(@msgAllProc)
+      rescue => exception
+          p exception
+          p 'couldnt connect to sister server'
+      end
     end
 
     def call(env)
@@ -26,6 +36,7 @@ module Chat
             ws.on :message do |event|
                 p ['websocket message event', event.data]
                 @clients.each {|client| client.send(event.data) }
+                @sisterClient.send(event.data)
             end
 
             ws.on :close do |event|
