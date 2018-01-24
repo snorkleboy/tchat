@@ -2,7 +2,7 @@
 
 require 'socket'
 require 'thread'
-require './sister_server'
+require_relative "./sister_server"
 require 'json'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
