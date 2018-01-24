@@ -2,6 +2,7 @@
 
 require 'socket'
 require 'thread'
+require './sister_server'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
 User = Struct.new(:client, :name, :address)
@@ -11,8 +12,13 @@ class Server
         @users = []
         @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
+        @sisterServer = SisterServer.new(9001,'localhost')
+        @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts(msg)}}
+        @sisterServer.start(@messageallProc)
         sockaddress = Socket.pack_sockaddr_in(port,host)
+        
         @socket.bind(sockaddress)
+        
         p "socket bound on #{host} #{port}"
         @users[0]=User.new(@socket, name)
         start()
@@ -32,9 +38,10 @@ class Server
                     # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
                     # if its not HTTP it welcomes to TCPChat and asks for a user name, then returns a userStruct(@socket,name)
                     user = handshake(connection)    
+                    @messageallProc.call("message")
                     puts user     
-                rescue
-                    p 'handshake rescue: error'
+                rescue => exception
+                    p "handshake rescue: #{exception}"
                     p self
                     Thread.Kill self
                 end
@@ -78,8 +85,9 @@ class Server
             puts msg
             begin
                 write_all(msg, user)
-            rescue
-                p 'write error'
+                @sisterServer.send("#{msg}")
+            rescue => exception
+                p "write error #{exception}"
             end
         }
     end
@@ -136,3 +144,5 @@ end
 
 
 server = Server.new(ARGV[0] || 9876,ARGV[1] || 'localhost')
+
+
