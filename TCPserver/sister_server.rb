@@ -4,6 +4,7 @@ class SisterServer
         sistersockaddress = Socket.pack_sockaddr_in(port,host)
         @location = [port,host]
         @SisterSocket.bind(sistersockaddress)
+        @connected = false
     end
 
     def start(proc)
@@ -15,6 +16,7 @@ class SisterServer
             Thread.new(@SisterSocket.accept) do |connection| 
                 @client = connection[0]
                 p "SISTER SERVER ACCEPTED :#{connection}"
+                @connected =true
                 listen(proc)
             end
         }
@@ -27,11 +29,18 @@ class SisterServer
             p "sisterserver listen #{msg}"
             proc.call(msg)
         end
+        p 'sister connection closing'
+        @client.close()
+        @connected = false
     end
 
     def send(msg)
-        p "sister server puts #{msg}"
-        @client.puts(msg)
+        if (@connected)
+            p "sister server puts #{msg}"
+            @client.puts(msg)
+        else
+            p 'sister server not connected to sister client'
+        end
     end
 
 end

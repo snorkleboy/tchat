@@ -30,7 +30,7 @@ class Server
         start_console()
         p 'console running'
         # on connection put new socket into new thread
-        # thread does 'handshake' which either returns HTTP and dissconnects or gets username from TCP cleint
+        # thread does 'handshake' which gets username from TCP cleint
         # If tcpclient it reads and broadcasts messages from it, otherwise it closes the connection in handhsake and then kills the thread.
         while(true) do
             thr = Thread.start(@socket.accept) do |connection| 
@@ -79,8 +79,8 @@ class Server
     end
 
     def read(user)
-        loop {
-            msg = user[:client].gets.chomp
+        while(msg = user[:client].gets.chomp)
+            
             puts "#{user[:name]}: #{msg}"
             begin
                 write_all("#{user[:name]}: #{msg}", user)
@@ -88,11 +88,26 @@ class Server
             rescue => exception
                 p "write error #{exception}"
             end
-        }
+        end
+        p "closing #{user[:client]}"
+        user[:client].close
+        p @users
+        @users.delete(user)
+        p @users
     end
 
     def write_all(msg, originator = null)
-        @users[1..-1].each {|user| user.client.puts(msg) unless(user == originator)}
+        @users[1..-1].each do |user| 
+            if(user != originator)
+                begin
+                    user.client.puts(msg) 
+                rescue => exception
+                    p "closing #{user}"
+                    user[:client].close
+                    @users.delete(user)
+                end
+            end
+        end
     end
 
     def start_console()
