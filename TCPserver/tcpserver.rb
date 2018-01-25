@@ -10,8 +10,9 @@ User = Struct.new(:client, :name, :address)
 
 class Server 
     def initialize(port, host, name = 'server')
+        
         @users = []
-        @threads = []
+        # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         @sisterServer = SisterServer.new(9001,'localhost')
         @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{JSON.parse(msg)['handle']}: #{JSON.parse(msg)['text']}" )}}
@@ -26,6 +27,7 @@ class Server
     end
     def start
         @socket.listen(5)
+        Thread.current[:name]='Main Listener'
         p 'listening' 
         start_console()
         p 'console running'
@@ -34,6 +36,7 @@ class Server
         # If tcpclient it reads and broadcasts messages from it, otherwise it closes the connection in handhsake and then kills the thread.
         while(true) do
             thr = Thread.start(@socket.accept) do |connection| 
+                
                 p "server accepted :#{connection}"
                 begin
                     # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
@@ -46,12 +49,13 @@ class Server
                     Thread.Kill self
                 end
                 if (user)
+                    thr[:name]=user[:name]
                     read(user)
                 else
                     Thread.Kill self
                 end
             end
-            @threads.push(thr)
+            # @threads.push(thr)
         end
     end
     def handshake(connection)
@@ -111,7 +115,8 @@ class Server
     end
 
     def start_console()
-        Thread.new() do
+        thr = Thread.new() do
+            thr[:name]='console'
             loop {
                 cmd = $stdin.gets.chomp
                 if (/msg*/.match(cmd))
@@ -126,15 +131,17 @@ class Server
                     puts "'diss'; disconnects all users"
                     puts "'myip'; outputs the IP adress of machine" 
                 elsif(cmd == 'see')
-                    puts "users:"
+                    puts "users: #{@users.length}"
                     @users.each{|user| puts user[:name]}
-                    puts "threads:"
-                    puts  @threads.length
+                    puts "threads: #{Thread.list.length}"
+                    Thread.list.each{|t| puts "thread name:#{t[:name]}"}
+                    
                 elsif(cmd == 'diss')
                     @users[1..-1].each{|user| user.client.close()}
                 elsif(cmd == 'myip')
                     p local_ip
                 end
+                
             }
         end
     end

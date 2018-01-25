@@ -8,12 +8,15 @@ class SisterServer
     end
 
     def start(proc)
+        
         p 'sister_server_start'
         p proc
         Thread.new(){
+            Thread.current[:name]='Sister Listener'
             @SisterSocket.listen(1)
             p "sister server up and listening on #{@location}"
             Thread.new(@SisterSocket.accept) do |connection| 
+                Thread.current[:name]="sister listener: #{connection}"
                 @client = connection[0]
                 p "SISTER SERVER ACCEPTED :#{connection}"
                 @connected =true
