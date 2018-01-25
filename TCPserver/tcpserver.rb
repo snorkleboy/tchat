@@ -64,7 +64,7 @@ class Server
             msg = client.gets.chomp
             p "client handshake: #{msg}"
             if (msg == 's')
-                client.puts "users : #{@users}"
+                client.puts "users : #{@users.map{|user| user[:name]}}"
             else
                 release = true
                 user = User.new(client,msg,connection[1])
@@ -79,7 +79,8 @@ class Server
     end
 
     def read(user)
-        while(msg = user[:client].gets.chomp.force_encoding('ASCII-8BIT'))
+        # encoding is for rare cases of someone trying to send something like cntrl-c (^c), which throws a 'cant convert ancci to utf' error.
+        while(msg = user[:client].gets.chomp.force_encoding("ISO-8859-1").encode("UTF-8"))
             puts "#{user[:name]}: #{msg}"
             begin
                 write_all("#{user[:name]}: #{msg}", user)
@@ -88,7 +89,7 @@ class Server
                 p "write error #{exception}"
             end
         end
-        p "closing #{user[:client]}"
+        p "closing #{[user[:client],user[:name]]}"
         user[:client].close
         p @users
         @users.delete(user)
