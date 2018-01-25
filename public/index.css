@@ -38,12 +38,14 @@ body{
     object-fit: cover;
     max-width: 100px;
 }
+
 .messageBox li:nth-child(odd){
     background-color: wheat;
 
 }
 .messages{
     height: 90%;
+     overflow-y: auto;
 }
 
 

@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         <h1>${data.handle}: ${data.text}</h1>
         `;
         messageBox.appendChild(msgEl);
+        bottomizeScroll();
         
     };
 
@@ -54,3 +55,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 });
+
+function bottomizeScroll() {
+    var element = document.getElementById("messages");
+    element.scrollTop = element.scrollHeight;
+}
