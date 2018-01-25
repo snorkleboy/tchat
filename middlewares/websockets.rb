@@ -2,7 +2,7 @@ require 'faye/websocket'
 require_relative "../TCPserver/sister_server"
 
 module Chat
-  class ChatBackend
+  class Websockets
     KEEPALIVE_TIME = 15 # in seconds
 
     def initialize(app)

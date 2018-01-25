@@ -1,0 +1,32 @@
+body{
+    position: relative;
+
+
+}
+
+.blur{
+    filter: blur(10px)
+}
+.signin{
+
+    position: absolute;
+    background-color:transparent;
+    z-index: 10;
+    margin: 0 auto;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    text-align: center
+}
+.signin-prompt{
+    padding: 15px;
+    width: fit-content;
+    height: fit-content;
+    background-color: rgb(170, 255, 248);
+}
+
+.signin-prompt input{
+    background-color: white;
+    padding: 3px;
+}

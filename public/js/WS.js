@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded',()=>{
     // console.log('loaded');
+    window.chat = {};
+    window.chat.name = 'anon';
     const subBtn = document.getElementById('submit');
-    const handleIn = document.getElementById('handle');
+    const chat = window.chat;
     const input = document.getElementById('chatin');
     const messageBox = document.getElementById('messageBox');
 
@@ -37,7 +39,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     subBtn.addEventListener('click',(e)=>{
         
         e.preventDefault();
-        const handle = handleIn.value;
+        const handle = chat.name;
         const text = input.value;
 
         console.log('submit clicked', handle, text);

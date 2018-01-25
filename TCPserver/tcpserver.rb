@@ -127,9 +127,9 @@ class Server
                     puts "'myip'; outputs the IP adress of machine" 
                 elsif(cmd == 'see')
                     puts "users:"
-                    puts @users
+                    @users.each{|user| puts user[:name]}
                     puts "threads:"
-                    puts  @threads
+                    puts  @threads.length
                 elsif(cmd == 'diss')
                     @users[1..-1].each{|user| user.client.close()}
                 elsif(cmd == 'myip')
