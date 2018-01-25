@@ -79,8 +79,7 @@ class Server
     end
 
     def read(user)
-        while(msg = user[:client].gets.chomp)
-            
+        while(msg = user[:client].gets.chomp.force_encoding('ASCII-8BIT'))
             puts "#{user[:name]}: #{msg}"
             begin
                 write_all("#{user[:name]}: #{msg}", user)

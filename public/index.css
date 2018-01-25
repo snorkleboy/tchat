@@ -7,7 +7,7 @@ body{
 .appholder{
     height: 80vh;
     width: 80vw;
-    background-color: darkblue;
+    background-color: rgb(186, 252, 147);
         display: flex;
     align-content: center;
     align-items: center;
@@ -16,12 +16,15 @@ body{
 }
 
 .messageholder{
-    background-color: aliceblue;
+    color: rgb(4, 36, 65);
+    background-color: rgb(255, 255, 255);
     height: 90%;
     width: 90%;
     margin: 20px;
     border-radius: 10px;
-
+    display: flex;
+    flex-direction: column;
+    border: 15px solid rgb(211, 204, 107);
 
 }
 .messageholder ul{
@@ -50,21 +53,36 @@ body{
 
 
 .buttons{
-    display: block;
+    display: flex;
     border-top:1px solid lightgray;
     padding: 5px;
-    height: 20px;
+    /* height: 20px; */
+    flex: 1;
+    align-items: center;
+    background-color: rgb(255, 252, 206);
 
 }
 .submit{
     /* display: block; */
-    background-color: blue;
-    width: 30px;
-    height: 20px;
+    background-color: rgb(252, 192, 81);;
+    border: 1px solid rgb(117, 117, 117);
+    width: fit-content;
+    height: fit-content;
     border-radius: 5px;
+    transition: 1s all;
+    padding: 5px 8px 5px 8px;
+    margin: 0 5px 0 15px;
+}
+.submit:hover{
+    background-color: rgb(247, 209, 139);;
+    border: 1px solid rgb(117, 117, 117);
 }
 .buttons input{
-    background-color:transparent;
-    height: 20px;
+    color: rgb(39, 58, 75);
+    background-color:white;
+    height: 80%;
     width: 90%;
+    padding: 5px;
+    margin-left: 5px;
+   
 }
