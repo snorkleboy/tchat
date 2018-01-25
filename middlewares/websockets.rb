@@ -31,7 +31,7 @@ module Chat
 
             ws.on :message do |event|
                 p ['websocket message event', event.data]
-                @clients.each {|client| client.send(event.data) }
+                @clients.each {|client| client.send(event.data) unless client==ws }
                 @sisterClient.send(event.data)
             end
 

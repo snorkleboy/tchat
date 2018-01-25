@@ -50,7 +50,17 @@ document.addEventListener('DOMContentLoaded',()=>{
             handle:handle,
             text:text
         }));
+
+        const msgEl = document.createElement('li');
+        msgEl.innerHTML = `
+        <h1>${handle}: ${text}</h1>
+        `;
+        messageBox.appendChild(msgEl);
+        bottomizeScroll();
+
+
         input.value="";
+        input.select();
     });
     document.addEventListener('keypress', (e) => {
         if (e.key == 'Enter') {
