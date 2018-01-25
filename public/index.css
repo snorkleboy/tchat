@@ -1,5 +1,7 @@
 body{
-    /* font-size: 100px; */
+        display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .appholder{
@@ -9,14 +11,16 @@ body{
         display: flex;
     align-content: center;
     align-items: center;
-    flex-direction: column;
+    border-radius: 20px;
+    /* flex-direction: column; */
 }
 
 .messageholder{
     background-color: aliceblue;
     height: 90%;
     width: 90%;
-    margin: 10px;
+    margin: 20px;
+    border-radius: 10px;
 
 
 }
@@ -28,14 +32,18 @@ body{
     height: 10%;
     width: 100%;
     padding: 15px;
+    box-sizing: border-box;
 }
 .messageholder li img{
     object-fit: cover;
     max-width: 100px;
 }
-.messageBox{
+.messageBox li:nth-child(odd){
     background-color: wheat;
 
+}
+.messages{
+    height: 90%;
 }
 
 
@@ -44,10 +52,10 @@ body{
 }
 #submit{
     /* display: block; */
-    background-color: whitesmoke;
+    background-color: blue;
     width: 100px;
     height: 50px;
 }
 input{
-    background-color: whitesmoke;
+    background-color:transparent;
 }
