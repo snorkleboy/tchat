@@ -52,7 +52,11 @@ document.addEventListener('DOMContentLoaded',()=>{
         }));
         input.value="";
     });
-
+    document.addEventListener('keypress', (e) => {
+        if (e.key == 'Enter') {
+            subBtn.click();
+        }
+    });
 
 });
 

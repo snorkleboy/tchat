@@ -51,13 +51,20 @@ body{
 
 .buttons{
     display: block;
+    border-top:1px solid lightgray;
+    padding: 5px;
+    height: 20px;
+
 }
-#submit{
+.submit{
     /* display: block; */
     background-color: blue;
-    width: 100px;
-    height: 50px;
+    width: 30px;
+    height: 20px;
+    border-radius: 5px;
 }
-input{
+.buttons input{
     background-color:transparent;
+    height: 20px;
+    width: 90%;
 }

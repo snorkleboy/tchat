@@ -30,3 +30,10 @@ body{
     background-color: white;
     padding: 3px;
 }
+
+.si-buttons{
+        display: block;
+    border-top:1px solid lightgray;
+    padding: 5px;
+    height: fit-content;
+}
