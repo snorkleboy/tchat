@@ -11,17 +11,19 @@ module Chat
             p ['connected to postgreSQL',db]
 
 
+            @routes = routes=Rack::URLMap.new(
+                "/test" => lambda{|env|
+                    [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"test"=>4})]]
+                },
+
+                '/route' => lambda{|env|
+                    [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"route"=>4})]]
+                }
+            )
         end
+
         def call(env)
-
-            map 'api/test' do
-                [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"test"=>4})]]
-            end
-
-            map 'api/route' do
-                [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"route"=>4})]]
-            end
-
+            @routes.call(env)
         end
     end
 end 

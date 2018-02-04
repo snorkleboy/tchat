@@ -15,7 +15,7 @@ class Server
         @users = []
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
-        @sisterServer = SisterServer.new(9001,'localhost')
+        @sisterServer = SisterServer.new(9000,'localhost')
         @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{msg['handle']}: #{msg['text']}" )}}
         @sisterServer.start(@messageallProc,self)
         sockaddress = Socket.pack_sockaddr_in(port,host)
@@ -38,14 +38,14 @@ class Server
         while(true) do
             thr = Thread.start(@socket.accept) do |connection| 
                 
-                p "server accepted :#{connection}"
+                p '',"server accepted :#{connection}"
                 begin
                     # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
                     # if its not HTTP it welcomes to TCPChat and asks for a user name, then returns a userStruct(@socket,name)
                     user = handshake(connection)   
                     puts user     
                 rescue => exception
-                    p "handshake rescue: #{exception}"
+                    p '',"handshake rescue: #{exception}"
                     p self
                     Thread.Kill self
                 end
@@ -73,12 +73,13 @@ class Server
             else
                 release = true
                 user = User.new(client,msg,'general',connection[1])
-                p "new user: #{user}"
+                p '',"new user: #{user}",''
             end 
         end
 
         @users.push(user)
         @rooms[user.room].push(user)
+        @sisterServer.send({'action'=>'userlist','data'=>{'userlist'=>@users}})
         user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
         user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
         return user
@@ -86,7 +87,7 @@ class Server
     end
 
     def read(user)
-        # encoding is for rare cases of someone trying to send something like cntrl-c (^c), which throws a 'cant convert ancci to utf' error.
+        # encoding is for rare cases of someone trying to send something like control-c (^c), which throws a 'cant convert ancci to utf' error.
         begin
             while(msg = user[:client].gets.chomp.force_encoding("ISO-8859-1").encode("UTF-8"))
                 puts "#{user[:name]}: #{msg}"
@@ -95,7 +96,7 @@ class Server
                         write_room("#{user[:name]}: #{msg}", user)
                         @sisterServer.send({'action'=>'msg','room'=>user[:room],'handle'=>user[:name],'text'=>msg})
                     rescue => exception
-                        p "write error #{exception}"
+                        p '',"write error #{exception}",''
                     end
                 else
                     clientMessageController(msg,user)
@@ -103,7 +104,7 @@ class Server
 
             end
         rescue
-            p "closing #{[user[:client],user[:name]]}"
+            p '',"closing #{[user[:client],user[:name]]}",''
             user[:client].close
             @users.delete(user)
             p @users
@@ -129,7 +130,7 @@ class Server
             begin
                 user.client.puts(msg) 
             rescue => exception
-                p "closing #{user}"
+                p '',"closing #{user}",''
                 user[:client].close
                 @users.delete(user)
             end

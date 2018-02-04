@@ -8,10 +8,11 @@ module Chat
     def initialize(app)
         @app     = app
         @clients = []
+        @rooms={'general'=>[]}
         begin
-            @sisterClient = SisterClient.new(9001,'localhost')
+            @sisterClient = SisterClient.new(9000,'localhost')
         rescue => exception
-            p [exception,'sister client not connected']
+            p '',[exception,'sister client not connected'],''
         end
         
         @msgAllProc = Proc.new{|msg| @clients.each{|client| client.send(msg) }}
@@ -19,7 +20,7 @@ module Chat
             @sisterClient.open(@msgAllProc)
         rescue => exception
             p exception
-            p 'couldnt connect to sister server'
+            p '','couldnt connect to sister server',''
         end
     end
 
@@ -28,20 +29,22 @@ module Chat
             ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
 
             ws.on :open do |event|
-                p ['websocket connection opened', ws.object_id]
+                
+                p '',['websocket connection opened', ws.object_id]
+                # p event
                 @clients << ws
-                p 'clients connected:'
+                p '','clients connected:'
                 p @clients.count
             end
 
             ws.on :message do |event|
-                p ['websocket message event', event.data]
+                p '',['websocket message event', event.data],''
                 @clients.each {|client| client.send(event.data) unless client==ws }
                 @sisterClient.send(JSON.parse(event.data))
             end
 
             ws.on :close do |event|
-                p ['websocket closing', ws.object_id, event.code, event.reason]
+                p '',['websocket closing', ws.object_id, event.code, event.reason],''
                 @clients.delete(ws)
                 ws = nil
             end
@@ -52,4 +55,20 @@ module Chat
         end
     end
   end
+end
+
+class Client
+    attr_accessor :ws,:name,:room,:tcp
+    
+    def initialize(wsInterface,name,room,tcp=false)
+        @ws=wsInterface
+        @name=name
+        @room=room
+        @tcp=tcp
+    end
+    def send(msg)
+        @ws.send
+    end
+
+
 end

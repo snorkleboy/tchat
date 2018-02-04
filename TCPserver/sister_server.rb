@@ -21,7 +21,7 @@ class SisterServer
                 Thread.current[:name]="sister listener: #{connection}"
                 @client = connection[0]
                 p "SISTER SERVER ACCEPTED :#{connection}"
-                @connected =true
+                @connected = true
                 listen(proc)
             end
         }
@@ -71,29 +71,46 @@ class SisterClient
                 listen(proc)
             } 
         rescue => exception
-            puts 'couldnt connect to sister server'
-            p exception
+            puts '','couldnt connect to sister server'
+            p exception,''
             @connected = false
         end
 
     end
 
     def listen(proc)
-        p "sister client start listen, proc= #{proc}"
-        while (true)
-            msg = socket.gets
-            puts "sister client received #{msg}"
-            proc.call(msg)
+        p '',"sister client start listen, proc= #{proc}",''
+        while (msg = socket.gets) 
+            message = JSON.parse(msg)
+            puts '',"sister client received #{message}",''
+            if (message['action'] == 'msg')           
+                proc.call(msg)
+            else
+                sisterController(message)
+            end
         end
     end
 
     def send(msg)
         if (@connected)
             msg['action']='msg'
-            p "sister client puts #{msg}"
+            p '',"sister client puts #{msg}",''
             @socket.puts(JSON.generate(msg))
         else
             p 'not connected to sister client'
+        end
+    end
+
+    def sisterController(msg)
+        p ['sister controller']
+        case msg['action']
+            when 'userlist'
+                p ["new userlist",msg]
+
+            when ''
+            
+            else
+                p ['unknown server action',msg]
         end
     end
 
