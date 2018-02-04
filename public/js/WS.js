@@ -1,14 +1,12 @@
-document.addEventListener('DOMContentLoaded',()=>{
+const WSmaker = (clientName) =>{
     // console.log('loaded');
-    window.chat = {};
-    window.chat.name = 'anon';
     const subBtn = document.getElementById('submit');
-    const chat = window.chat;
+    const chat = clientName;
     const input = document.getElementById('chatin');
     const messageBox = document.getElementById('messageBox');
 
     const scheme = "ws://";
-    const uri = scheme + window.document.location.host + "/";
+    const uri = scheme + window.document.location.host + "/"+chat;
     const ws = new WebSocket(uri);
 
     // console.log(ws);
@@ -16,12 +14,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     ws.onmessage = (msg)=>{
         // console.log('received:',msg);
         const data = JSON.parse(msg.data);
-        const msgEl = document.createElement('li');
-        msgEl.innerHTML = `
+        if (data.action === 'msg'){
+            const msgEl = document.createElement('li');
+            msgEl.innerHTML = `
         <h1>${data.handle}: ${data.text}</h1>
         `;
-        messageBox.appendChild(msgEl);
-        bottomizeScroll();
+            messageBox.appendChild(msgEl);
+            bottomizeScroll();
+        }else{
+            console.log('RECEIVED WS COMMAND!',data)
+        }
         
     };
 
@@ -34,7 +36,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
 
     ws.onopen = (e) =>{
-         console.log('websocket opening',e);
+        ws.send(JSON.stringify({
+            'action': 'newUser',
+            'payload':{'name':chat,'room':'general'}
+        }))
     };
 
     subBtn.addEventListener('click',(e)=>{
@@ -46,7 +51,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         console.log('submit clicked', handle, text);
 
         ws.send(JSON.stringify({
-            room:0,
+            action:'msg',
+            room:'general',
             handle:handle,
             text:text
         }));
@@ -68,7 +74,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         }
     });
 
-});
+};
 
 function bottomizeScroll() {
     var element = document.getElementById("messages");

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     signinSubmit.addEventListener('click',()=>{
         console.log(handlein.value);
-        window.chat.name = handlein.value.length >1 ? handlein.value : 'anon'
+        WSmaker(handlein.value.length > 1 ? handlein.value : 'anon');
         appholder.classList.remove('blur');
         signin.style.display = 'none';
     })

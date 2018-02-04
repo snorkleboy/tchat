@@ -29,17 +29,23 @@ module Chat
             ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
 
             ws.on :open do |event|
-                
+                p '','',env.methods,'',env['PATH_INFO']
                 p '',['websocket connection opened', ws.object_id]
                 # p event
-                @clients << ws
+                wsClient = Client.new(ws,env['PATH_INFO'],'general',false)
+                @clients.push(wsClient)
+                @rooms[wsClient.room].push(wsClient)
+                wsClient.send(JSON.generate({
+                    'action'=>'userlist',
+                    'payload'=>{'userlist'=>@clients.map{|user|user.name}}
+                }))
                 p '','clients connected:'
-                p @clients.count
+                p [@clients.count,@clients.map{|client| client.name}]
             end
 
             ws.on :message do |event|
                 p '',['websocket message event', event.data],''
-                @clients.each {|client| client.send(event.data) unless client==ws }
+                @clients.each {|client| client.send(event.data) unless client.ws==ws }
                 @sisterClient.send(JSON.parse(event.data))
             end
 
@@ -67,7 +73,7 @@ class Client
         @tcp=tcp
     end
     def send(msg)
-        @ws.send
+        @ws.send(msg)
     end
 
 

@@ -13,7 +13,7 @@ module Chat
 
             @routes = routes=Rack::URLMap.new(
                 "/test" => lambda{|env|
-                    [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"test"=>4})]]
+                    [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"db"=>db})]]
                 },
 
                 '/route' => lambda{|env|
@@ -23,6 +23,7 @@ module Chat
         end
 
         def call(env)
+            p '',['api controller'],''
             @routes.call(env)
         end
     end
