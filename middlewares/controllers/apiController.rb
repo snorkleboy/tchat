@@ -7,12 +7,20 @@ module Chat
             @app=app
             db = Sequel.connect(adapter: :postgres, user: 'snorkleboy', host: '/var/run/postgresql', port: 5432,
   database: 'chat', max_connections: 10)
-            p db
+            p ['connected to postgreSQL',db]
 
 
         end
         def call(env)
-            [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"a"=>4})]]
+
+            map 'api/test' do
+                [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"test"=>4})]]
+            end
+
+            map 'api/route' do
+                [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"route"=>4})]]
+            end
+
         end
     end
 end 
