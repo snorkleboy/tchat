@@ -12,7 +12,7 @@ module Chat
                 'Content-Type'  => 'text/html',
                 'Cache-Control' => 'public, max-age=86400'
                 },
-                File.open('index.html', File::RDONLY)
+                File.open('../public/index.html', File::RDONLY)
             ]
         end
     end
