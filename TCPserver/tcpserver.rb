@@ -16,7 +16,7 @@ class Server
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         @sisterServer = SisterServer.new(9001,'localhost')
-        @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{JSON.parse(msg)['handle']}: #{JSON.parse(msg)['text']}" )}}
+        @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{msg['handle']}: #{msg['text']}" )}}
         @sisterServer.start(@messageallProc,self)
         sockaddress = Socket.pack_sockaddr_in(port,host)
         
@@ -93,7 +93,7 @@ class Server
                 if (msg[0] !="\\")             
                     begin
                         write_room("#{user[:name]}: #{msg}", user)
-                        @sisterServer.send(JSON.generate({'handle'=>user[:name],'text'=>msg}))
+                        @sisterServer.send({'action'=>'msg','room'=>user[:room],'handle'=>user[:name],'text'=>msg})
                     rescue => exception
                         p "write error #{exception}"
                     end
@@ -191,6 +191,12 @@ class Server
         command[0] = command[0][1..-1]
         p ['client command',command, originator]
         case command[0]
+            when 'help'
+                originator.client.puts [
+                     ['\\croom {room}','change rooms to {room}'],
+                     ['\\see','see all rooms and users'],
+                     ['\\seeroom','see users in same room']
+                ]
             when 'croom'
                 @rooms[originator.room].delete(originator)
                 @rooms[command[1]] = @rooms[command[1]].push(originator)

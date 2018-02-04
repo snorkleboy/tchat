@@ -26,15 +26,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
 
     ws.onerror = (err) =>{
-        // console.log('web socket error',err);
+         console.log('web socket error',err);
     };
 
     ws.onclose = (e) =>{
-        // console.log('websocket closing',e);
+         console.log('websocket closing',e);
     };
 
     ws.onopen = (e) =>{
-        // console.log('websocket opening',e);
+         console.log('websocket opening',e);
     };
 
     subBtn.addEventListener('click',(e)=>{

@@ -1,6 +1,6 @@
 require 'faye/websocket'
 require_relative "../TCPserver/sister_server"
-
+require 'json'
 module Chat
   class Websockets
     KEEPALIVE_TIME = 15 # in seconds
@@ -37,7 +37,7 @@ module Chat
             ws.on :message do |event|
                 p ['websocket message event', event.data]
                 @clients.each {|client| client.send(event.data) unless client==ws }
-                @sisterClient.send(event.data)
+                @sisterClient.send(JSON.parse(event.data))
             end
 
             ws.on :close do |event|

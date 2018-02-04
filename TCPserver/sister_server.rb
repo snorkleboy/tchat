@@ -1,3 +1,4 @@
+require 'json'
 class SisterServer
     def initialize(port, host)
         @SisterSocket = Socket.new(AF_INET, SOCK_STREAM, 0)
@@ -29,9 +30,9 @@ class SisterServer
     def listen(proc)
         p "sisterserver listen start, proc=#{proc}"
         while (msg = @client.gets)
-            
-            p "sisterserver listen #{msg}"
-            proc.call(msg)
+            message = JSON.parse(msg)
+            puts "sisterserver listen #{[message,msg]}"
+            proc.call(message)
         end
         p 'sister connection closing'
         @client.close()
@@ -40,8 +41,8 @@ class SisterServer
 
     def send(msg)
         if (@connected)
-            p "sister server puts #{msg}"
-            @client.puts(msg)
+            p "sister server puts #{[msg]}"
+            @client.puts(JSON.generate(msg))
         else
             p 'sister server not connected to sister client'
         end
@@ -81,15 +82,16 @@ class SisterClient
         p "sister client start listen, proc= #{proc}"
         while (true)
             msg = socket.gets
-            p "sister client received #{msg}"
+            puts "sister client received #{msg}"
             proc.call(msg)
         end
     end
 
     def send(msg)
         if (@connected)
+            msg['action']='msg'
             p "sister client puts #{msg}"
-            @socket.puts(msg)
+            @socket.puts(JSON.generate(msg))
         else
             p 'not connected to sister client'
         end
