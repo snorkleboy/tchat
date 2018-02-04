@@ -6,16 +6,21 @@ module Chat
     KEEPALIVE_TIME = 15 # in seconds
 
     def initialize(app)
-      @app     = app
-      @clients = []
-      @sisterClient = SisterClient.new(9001,'localhost')
-      @msgAllProc = Proc.new{|msg| @clients.each{|client| client.send(msg) }}
-      begin
-          @sisterClient.open(@msgAllProc)
-      rescue => exception
-          p exception
-          p 'couldnt connect to sister server'
-      end
+        @app     = app
+        @clients = []
+        begin
+            @sisterClient = SisterClient.new(9001,'localhost')
+        rescue => exception
+            p [exception,'sister client not connected']
+        end
+        
+        @msgAllProc = Proc.new{|msg| @clients.each{|client| client.send(msg) }}
+        begin
+            @sisterClient.open(@msgAllProc)
+        rescue => exception
+            p exception
+            p 'couldnt connect to sister server'
+        end
     end
 
     def call(env)
