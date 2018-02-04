@@ -5,8 +5,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
-gem 'activerecord'
 
+gem 'sequel'
 gem 'rack'
 gem 'rake'
 gem 'pg'
