@@ -7,10 +7,11 @@ class SisterServer
         @connected = false
     end
 
-    def start(proc)
+    def start(proc,tcpserver)
         
         p 'sister_server_start'
         p proc
+        p tcpserver
         Thread.new(){
             Thread.current[:name]='Sister Listener'
             @SisterSocket.listen(1)

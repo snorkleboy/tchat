@@ -6,17 +6,18 @@ require_relative "./sister_server"
 require 'json'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
-User = Struct.new(:client, :name, :address)
+User = Struct.new(:client, :name,:room, :address)
 
 class Server 
     def initialize(port, host, name = 'server')
-        
+        @rooms = {'general'=>[]}
+        @rooms.default = []
         @users = []
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         @sisterServer = SisterServer.new(9001,'localhost')
         @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{JSON.parse(msg)['handle']}: #{JSON.parse(msg)['text']}" )}}
-        @sisterServer.start(@messageallProc)
+        @sisterServer.start(@messageallProc,self)
         sockaddress = Socket.pack_sockaddr_in(port,host)
         
         @socket.bind(sockaddress)
@@ -71,36 +72,45 @@ class Server
                 client.puts "users : #{@users.map{|user| user[:name]}}"
             else
                 release = true
-                user = User.new(client,msg,connection[1])
+                user = User.new(client,msg,'general',connection[1])
                 p "new user: #{user}"
             end 
         end
 
         @users.push(user)
+        @rooms[user.room].push(user)
         user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
+        user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
         return user
 
     end
 
     def read(user)
         # encoding is for rare cases of someone trying to send something like cntrl-c (^c), which throws a 'cant convert ancci to utf' error.
-        while(msg = user[:client].gets.chomp.force_encoding("ISO-8859-1").encode("UTF-8"))
-            puts "#{user[:name]}: #{msg}"
-            begin
-                write_all("#{user[:name]}: #{msg}", user)
-                @sisterServer.send(JSON.generate({'handle'=>user[:name],'text'=>msg}))
-            rescue => exception
-                p "write error #{exception}"
+        begin
+            while(msg = user[:client].gets.chomp.force_encoding("ISO-8859-1").encode("UTF-8"))
+                puts "#{user[:name]}: #{msg}"
+                if (msg[0] !="\\")             
+                    begin
+                        write_room("#{user[:name]}: #{msg}", user)
+                        @sisterServer.send(JSON.generate({'handle'=>user[:name],'text'=>msg}))
+                    rescue => exception
+                        p "write error #{exception}"
+                    end
+                else
+                    clientMessageController(msg,user)
+                end
+
             end
+        rescue
+            p "closing #{[user[:client],user[:name]]}"
+            user[:client].close
+            @users.delete(user)
+            p @users
         end
-        p "closing #{[user[:client],user[:name]]}"
-        user[:client].close
-        p @users
-        @users.delete(user)
-        p @users
     end
 
-    def write_all(msg, originator = null)
+    def write_all(msg, originator = nil)
         @users[1..-1].each do |user| 
             if(user != originator)
                 begin
@@ -110,6 +120,18 @@ class Server
                     user[:client].close
                     @users.delete(user)
                 end
+            end
+        end
+    end
+
+    def write_room(msg,originator, room =  nil)
+        @rooms[room || originator.room].each do |user| 
+            begin
+                user.client.puts(msg) 
+            rescue => exception
+                p "closing #{user}"
+                user[:client].close
+                @users.delete(user)
             end
         end
     end
@@ -159,6 +181,30 @@ class Server
         end
         ensure
             Socket.do_not_reverse_lookup = orig
+    end
+
+    #if msg comes in with '\' as first charecter it gets sent to this controller
+    # msg syntax is \'command' 'parameter'
+    # like '\croom general' to change to room 'general'
+    def clientMessageController(msg, originator)
+        command = msg.split(' ')
+        command[0] = command[0][1..-1]
+        p ['client command',command, originator]
+        case command[0]
+            when 'croom'
+                @rooms[originator.room].delete(originator)
+                @rooms[command[1]] = @rooms[command[1]].push(originator)
+                originator.room = command[1]
+                originator.client.puts "changed room to #{command[1]}"
+            when 'see'
+                originator.client.puts @rooms.keys.map{|room| [room,@rooms[room].map{|user| user.name}]}
+            when 'seeroom'
+                originator.client.puts [originator.room,@rooms[originator.room].map{|user| user.name}]
+            else
+                p 'unknown client command'
+                originator.puts 'SERVER WARNING:unknown command'
+        end
+
     end
 
 end
