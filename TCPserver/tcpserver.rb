@@ -14,11 +14,53 @@ User = Struct.new(:client, :name,:room, :address) do
     end
 end
 
+class Rooms
+    def [](room)
+        @rooms[room]
+    end
+    def rooms=(obj)
+        @rooms = obj
+    end
+    def rooms
+        @rooms
+    end
+    def initialize(senduserlistProc)
+        @rooms = Hash.new{|h,v| h[v]=Array.new()}
+        @rooms['general']=[]
+        @sendUserList = senduserlistProc
+    end
+    def push(user)
+        @rooms[user.room].push(user)
+        @sendUserList.call()
+    end
+
+    def changeRoom(user,newroom)
+        oldroom = user.room
+        @rooms[oldroom].delete(user)
+        @rooms.delete(oldroom) if (oldroom != 'general' && @rooms[oldroom].empty?)
+        @rooms[newroom] = @rooms[newroom].push(user)
+        user.room = newroom
+        @sendUserList.call()
+    end
+
+    def delete(user)
+        @rooms[user.room].delete(user)
+        @sendUserList.call()
+    end
+    def users()
+        @rooms.values.flatten
+    end
+
+    def keys()
+        @rooms.keys
+    end
+    def values
+        @rooms.values
+    end
+end
 class Server 
     def initialize(port, host, name = 'TCPserverHOST')
-        @rooms = {'general'=>[]}
-        @rooms.default = []
-        @users = []
+        @rooms = Rooms.new(Proc.new{sendUserList()})
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         @sisterServer = SisterServer.new(9009,'localhost')
@@ -29,7 +71,7 @@ class Server
         @socket.bind(sockaddress)
         
         p "socket bound on #{host} #{port}"
-        @users[0]=User.new(@socket, name,'general')
+        
         start()
     end
     def start
@@ -67,12 +109,11 @@ class Server
         client = connection[0]
         client.puts "welcome to Tchat"
         while (!release)
-            
             client.puts "please enter a username. to see who is on enter 's'"
             msg = client.gets.chomp
             p "client handshake: #{msg}"
             if (msg == 's')
-                client.puts "users : #{@users.map{|user| user[:name]}}"
+                client.puts "users : #{@rooms.users().map{|user| user[:name]}}"
             else
                 release = true
                 user = User.new(client,msg,'general',connection[1])
@@ -80,10 +121,8 @@ class Server
             end 
         end
 
-        @users.push(user)
-        @rooms[user.room].push(user)
-        sendUserList()
-        user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
+        @rooms.push(user)
+        user[:client].puts "currently connected: #{@rooms.users().map{|user| user[:name]}}"
         user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
         return user
 
@@ -109,20 +148,20 @@ class Server
         rescue
             p '',"closing #{[user[:client],user[:name]]}",''
             user[:client].close
-            @users.delete(user)
-            p @users
+            @rooms.delete(user)
+            p @rooms
         end
     end
 
     def write_all(msg, originator = nil)
-        @users[1..-1].each do |user| 
+        @rooms.users().each do |user| 
             if(user != originator)
                 begin
                     user.client.puts(msg) 
                 rescue => exception
                     p "closing #{user}"
                     user[:client].close
-                    @users.delete(user)
+                    @rooms.delete(user)
                 end
             end
         end
@@ -135,7 +174,7 @@ class Server
             rescue => exception
                 p '',"closing #{user}",''
                 user[:client].close
-                @users.delete(user)
+                @rooms.delete(user)
             end
         end
     end
@@ -146,7 +185,6 @@ class Server
             loop {
                 cmd = $stdin.gets.chomp
                 if (/msg*/.match(cmd))
-                    me = @users[0]
                     msg =  (/msg(.*)/.match(cmd))
                     msg = me.name + msg[1]
                     p msg
@@ -157,13 +195,13 @@ class Server
                     puts "'diss'; disconnects all users"
                     puts "'myip'; outputs the IP adress of machine" 
                 elsif(cmd == 'see')
-                    puts "users: #{@users.length}"
-                    @users.each{|user| puts user[:name]}
+                    puts "users: #{@rooms.users().length}"
+                    @rooms.users().each{|user| puts user[:name]}
                     puts "threads: #{Thread.list.length}"
                     Thread.list.each{|t| puts "thread name:#{t[:name]}"}
                     
                 elsif(cmd == 'diss')
-                    @users[1..-1].each{|user| user.client.close()}
+                    @rooms.users().each{|user| user.client.close()}
                 elsif(cmd == 'myip')
                     p local_ip
                 end
@@ -189,7 +227,7 @@ class Server
 
     def sendUserList
         begin
-            @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@users,'rooms'=>@rooms}})
+            @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
         rescue => e
             p ['send userlist error',e]
         end
@@ -210,11 +248,7 @@ class Server
                      ['\\seeroom','see users in same room']
                 ]
             when 'croom'
-                @rooms[originator.room].delete(originator)
-                @rooms.delete(originator.room) if (originator.room != 'general' && @rooms[originator.room].empty?)
-                @rooms[command[1]] = @rooms[command[1]].push(originator)
-                originator.room = command[1]
-                sendUserList()
+                @rooms.changeRoom(originator,command[1])
                 originator.client.puts "changed room to #{command[1]}"
             when 'see'
                 originator.client.puts @rooms.keys.map{|room| [room,@rooms[room].map{|user| user.name}]}

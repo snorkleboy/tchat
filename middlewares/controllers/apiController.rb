@@ -17,7 +17,7 @@ module Chat
                 },
 
                 '/route' => lambda{|env|
-                    [200, { 'Content-Type' => 'application/json' }, [ JSON.generate({"route"=>4})]]
+                    [200, { 'Content-Type' => 'application/json' }, JSON.generate({ "route"=>['route',1,2,3,4,5,6,7] })]
                 }
             )
         end
