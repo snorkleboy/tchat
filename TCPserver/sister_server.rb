@@ -85,7 +85,7 @@ class SisterClient
             message = JSON.parse(msg)
             puts '',"sister client received #{message}",''
             if (message['action'] == 'msg')           
-                proc.call(msg)
+                proc.call(msg,message['room'])
             else
                 sisterController(message)
             end
@@ -105,7 +105,7 @@ class SisterClient
     def sisterController(msg)
         p ['sister controller']
         case msg['action']
-            when 'userlist'
+            when 'userList'
                 p ["new userlist",msg]
                 @parent.addUsers(msg['payload'])
 

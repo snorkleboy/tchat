@@ -22,14 +22,14 @@ class Server
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         @sisterServer = SisterServer.new(9009,'localhost')
-        @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{msg['handle']}: #{msg['text']}" )}}
+        @messageallProc = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
         @sisterServer.start(@messageallProc,self)
         sockaddress = Socket.pack_sockaddr_in(port,host)
         
         @socket.bind(sockaddress)
         
         p "socket bound on #{host} #{port}"
-        @users[0]=User.new(@socket, name)
+        @users[0]=User.new(@socket, name,'general')
         start()
     end
     def start
@@ -82,12 +82,8 @@ class Server
 
         @users.push(user)
         @rooms[user.room].push(user)
-        begin
-            @sisterServer.send({'action'=>'userlist','payload'=>{'userlist'=>@users,'rooms'=>@rooms}})
-        rescue => e
-            p ['send userlist error',e]
-        end
-            user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
+        sendUserList()
+        user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
         user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
         return user
 
@@ -191,6 +187,14 @@ class Server
             Socket.do_not_reverse_lookup = orig
     end
 
+    def sendUserList
+        begin
+            @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@users,'rooms'=>@rooms}})
+        rescue => e
+            p ['send userlist error',e]
+        end
+    end
+
     #if msg comes in with '\' as first charecter it gets sent to this controller
     # msg syntax is \'command' 'parameter'
     # like '\croom general' to change to room 'general'
@@ -207,8 +211,10 @@ class Server
                 ]
             when 'croom'
                 @rooms[originator.room].delete(originator)
+                @rooms.delete(originator.room) if (originator.room != 'general' && @rooms[originator.room].empty?)
                 @rooms[command[1]] = @rooms[command[1]].push(originator)
                 originator.room = command[1]
+                sendUserList()
                 originator.client.puts "changed room to #{command[1]}"
             when 'see'
                 originator.client.puts @rooms.keys.map{|room| [room,@rooms[room].map{|user| user.name}]}

@@ -10,6 +10,7 @@ module Chat
             @usersList = [];
             @clients = []
             @foreignUsers = []
+            @foreignRooms = {}
             @rooms=Hash.new{|h,k| h[k]=Array.new()}
             @rooms['general']=[]
             begin
@@ -18,7 +19,7 @@ module Chat
                 p '',[exception,'sister client not connected'],''
             end
             
-            @msgAllProc = Proc.new{|msg| @clients.each{|client| client.send(msg) }}
+            @msgAllProc = Proc.new{|msg,room| @rooms[room].each{|client| client.send(msg)}}
             begin
                 @sisterClient.open(@msgAllProc)
             rescue => exception
@@ -30,18 +31,13 @@ module Chat
         def call(env)
             if Faye::WebSocket.websocket?(env)
                 ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
-                wsClient = Client.new(ws,env['PATH_INFO'][1..-1],'general',false)
+                wsClient = Client.new(ws,env['PATH_INFO'][1..-1],'general',true)
                 ws.on :open do |event|
                     p '',['websocket connection opened', ws.object_id]
                     @clients.push(wsClient)
                     @rooms[wsClient.room].push(wsClient)
                     # send userlist to frontend
-                    @clients.each do |client|
-                        client.send(JSON.generate({
-                            'action'=>'userList',
-                            'payload'=>{'userList'=>@clients,'rooms'=>@rooms}
-                        }))
-                    end
+                    sendUserListToClient()
                     p '','clients connected:'
                     p [@clients.count,@clients.map{|client| client.name}]
                 end
@@ -82,22 +78,32 @@ module Chat
                     @rooms.delete(oldRoom) if (oldRoom != 'general' && @rooms[oldRoom].empty?)
                     @rooms[newRoom]= @rooms[newRoom].push(client)
                     client.room = newRoom
-                    @clients.each do |client|
-                        client.send(JSON.generate({
-                            'action'=>'userList',
-                            'payload'=>{'userList'=>@clients,'rooms'=>@rooms}
-                        }))
-                    end
+                    sendUserListToClient()
                     p 'change room',@rooms
                 else
                     p 'unrecognized webSocketClient command'
             end
         end
 
+        def sendUserListToClient
+            tempCopy = {}
+            @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
+            tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
+            p 'tempcopy',tempCopy
+            @clients.each do |client|
+                client.send(JSON.generate({
+                    'action'=>'userList',
+                    'payload'=>{'userList'=>@clients,'rooms'=>tempCopy}
+                }))
+            end
+        end
+
         def addUsers(payload)
             @foreignUsers = payload['userList']
-            @rooms = payload['rooms'].merge(@rooms){|k,v1,v2| v1.concat(v2)}
-            p 'added users',@rooms,@foreignUsers,''
+            @foreignRooms = payload['rooms']
+            sendUserListToClient()
+            p 'added users',@rooms,@foreignRooms,''
+            
         end
 
 
@@ -108,11 +114,11 @@ end
 class Client
     attr_accessor :ws,:name,:room,:tcp
     
-    def initialize(wsInterface,name,room,tcp=false)
+    def initialize(wsInterface,name,room,websocket=true)
         @ws=wsInterface
         @name=name
         @room=room
-        @tcp=tcp
+        @websocket=tcp
     end
 
     def send(msg)
@@ -122,7 +128,7 @@ class Client
         @name
     end
     def to_json(options)
-        {'name'=>@name,'room'=>@room,'tcpclient?'=>@tcp}.to_json
+        {'name'=>@name,'room'=>@room,'websocket?'=>@websocket}.to_json
     end
 
 
