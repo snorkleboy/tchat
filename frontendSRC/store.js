@@ -1,10 +1,15 @@
 const Store = function(){
     this.handle = ''
+    this.room = 'general'
     this.store = {};
     this.rooms = {};
     this.userList={}
     this.msgs = [];
+    this.roomName = this.roomName.bind(this);
 } 
+Store.prototype.roomName = function(){
+    return this.room
+}
 
 
 Store.prototype.changeUserlist = function(rooms,userList){

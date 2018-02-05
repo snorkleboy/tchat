@@ -76,13 +76,9 @@ module Chat
                     p 'change room action',msg,client.name,@rooms
                     newRoom = msg['payload']['room']
                     oldRoom = client.room
-                    p 'HERE 1',newRoom,oldRoom
                     client.room = newRoom
-                    p 'here 2',client.room
                     @rooms[oldRoom].delete(client)
-                    p 'here 3'
                     @rooms[newRoom] = @rooms[newRoom].push(client)
-                    p 'here4'
                     @clients.each do |client|
                         client.send(JSON.generate({
                             'action'=>'userList',

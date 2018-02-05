@@ -123,10 +123,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var Store = function Store() {
     this.handle = '';
+    this.room = 'general';
     this.store = {};
     this.rooms = {};
     this.userList = {};
     this.msgs = [];
+    this.roomName = this.roomName.bind(this);
+};
+Store.prototype.roomName = function () {
+    return this.room;
 };
 
 Store.prototype.changeUserlist = function (rooms, userList) {
@@ -237,7 +242,7 @@ var WSmaker = function WSmaker(store) {
 
         ws.send(JSON.stringify({
             action: 'msg',
-            room: 'general',
+            room: store.roomName(),
             handle: handle,
             text: text
         }));
@@ -259,6 +264,7 @@ var WSmaker = function WSmaker(store) {
 
     //change rooms
     roomChangeButton.addEventListener('click', function (e) {
+        store.room = roomChangeInput.value;
         ws.send(JSON.stringify({
             action: 'roomChange',
             payload: {
