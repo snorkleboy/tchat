@@ -8,12 +8,13 @@ const WSmaker = (store) =>{
     input.focus();
     const messageBox = document.getElementById('messageBox');
 
+    const roomChangeInput = document.getElementById('roomChangeInput');
+    const roomChangeButton = document.getElementById('roomChangeButton')
+
     const scheme = "ws://";
     const uri = scheme + window.document.location.host + "/"+handle;
     const ws = new WebSocket(uri);
 
-    // console.log(ws);
-    // console.log(uri);
     ws.onmessage = (msg)=>{
         // console.log('received:',msg);
         const data = JSON.parse(msg.data);
@@ -48,6 +49,7 @@ const WSmaker = (store) =>{
     ws.onopen = (e) =>{
     };
 
+    // send message
     subBtn.addEventListener('click',(e)=>{
         
         e.preventDefault();
@@ -73,11 +75,23 @@ const WSmaker = (store) =>{
         input.value="";
         input.select();
     });
+    //send message by pressing enter
     document.addEventListener('keypress', (e) => {
         if (e.key == 'Enter') {
             subBtn.click();
         }
     });
+
+    //change rooms
+    roomChangeButton.addEventListener('click',(e)=>{
+        ws.send(JSON.stringify({
+            action: 'roomChange',
+            payload:{
+                room: roomChangeInput.value
+            }
+        }));
+
+    })
 
 };
 

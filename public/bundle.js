@@ -190,12 +190,13 @@ var WSmaker = function WSmaker(store) {
     input.focus();
     var messageBox = document.getElementById('messageBox');
 
+    var roomChangeInput = document.getElementById('roomChangeInput');
+    var roomChangeButton = document.getElementById('roomChangeButton');
+
     var scheme = "ws://";
     var uri = scheme + window.document.location.host + "/" + handle;
     var ws = new WebSocket(uri);
 
-    // console.log(ws);
-    // console.log(uri);
     ws.onmessage = function (msg) {
         // console.log('received:',msg);
         var data = JSON.parse(msg.data);
@@ -226,6 +227,7 @@ var WSmaker = function WSmaker(store) {
 
     ws.onopen = function (e) {};
 
+    // send message
     subBtn.addEventListener('click', function (e) {
 
         e.preventDefault();
@@ -248,10 +250,21 @@ var WSmaker = function WSmaker(store) {
         input.value = "";
         input.select();
     });
+    //send message by pressing enter
     document.addEventListener('keypress', function (e) {
         if (e.key == 'Enter') {
             subBtn.click();
         }
+    });
+
+    //change rooms
+    roomChangeButton.addEventListener('click', function (e) {
+        ws.send(JSON.stringify({
+            action: 'roomChange',
+            payload: {
+                room: roomChangeInput.value
+            }
+        }));
     });
 };
 
