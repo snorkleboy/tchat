@@ -128,25 +128,45 @@ var Store = function Store() {
     this.userList = {};
     this.msgs = [];
 };
+
 Store.prototype.changeUserlist = function (rooms, userList) {
     this.userList = userList;
     this.rooms = rooms;
     var userListEl = document.getElementById('userList');
     userListEl.innerHTML = '';
     Object.keys(this.rooms).forEach(function (room) {
+
         var roomEl = document.createElement('li');
+        roomEl.innerHTML = '<button id=\'roomButton\' data-room=' + room + '>' + room + '</button>';
+        roomEl.classList.add('room');
+
         var roomElList = document.createElement('ul');
-        roomEl.innerHTML = '<h1>' + room + '</h1>';
+        roomElList.classList.add('roomUserList');
+
         roomEl.appendChild(roomElList);
         userListEl.appendChild(roomEl);
+
         rooms[room].forEach(function (user) {
             console.log('userlist', typeof user === 'undefined' ? 'undefined' : _typeof(user), user);
             var li = document.createElement('li');
-            li.innerHTML = '<h1>' + user.name + '</h1>';
+            li.innerHTML = '<button id=\'userButton\' data-name=' + user.name + '\'>' + user.name + '</button>';
             roomElList.appendChild(li);
+        });
+
+        document.querySelectorAll('#roomButton').forEach(function (button) {
+            button.addEventListener('click', function (e) {
+                console.log(button.dataset.room);
+            });
+        });
+
+        document.querySelectorAll('#userButton').forEach(function (button) {
+            button.addEventListener('click', function (e) {
+                console.log(button.dataset.name);
+            });
         });
     });
 };
+
 var store = new Store();
 exports.default = store;
 

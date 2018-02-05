@@ -5,26 +5,49 @@ const Store = function(){
     this.userList={}
     this.msgs = [];
 } 
+
+
 Store.prototype.changeUserlist = function(rooms,userList){
     this.userList = userList;
     this.rooms=rooms;
     const userListEl = document.getElementById('userList');
     userListEl.innerHTML=''
     Object.keys(this.rooms).forEach((room)=>{
+
+
         const roomEl = document.createElement('li');
+        roomEl.innerHTML = `<button id='roomButton' data-room=${room}>${room}</button>`
+        roomEl.classList.add('room')
+
         const roomElList = document.createElement('ul');
-        roomEl.innerHTML=`<h1>${room}</h1>`
+        roomElList.classList.add('roomUserList')
+        
         roomEl.appendChild(roomElList);
         userListEl.appendChild(roomEl)
+
         rooms[room].forEach((user)=>{
             console.log('userlist', typeof (user), user);
             const li = document.createElement('li');
-            li.innerHTML = `<h1>${user.name}</h1>`
+            li.innerHTML = `<button id='userButton' data-name=${user.name}'>${user.name}</button>`
             roomElList.appendChild(li);
         })
         
+        document.querySelectorAll('#roomButton').forEach((button)=>{
+            button.addEventListener('click',(e)=>{
+                console.log(button.dataset.room)
+            })
+        })
+
+        document.querySelectorAll('#userButton').forEach((button) => {
+            button.addEventListener('click', (e) => {
+                console.log(button.dataset.name)
+            })
+        })
+
     })
 
 }
+
+
 const store = new Store()
 export default store;

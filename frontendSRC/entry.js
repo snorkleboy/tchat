@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         appholder.classList.remove('blur');
         signin.style.display = 'none';
     })
+
+
 });
 
 
