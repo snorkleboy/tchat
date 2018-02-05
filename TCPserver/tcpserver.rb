@@ -28,6 +28,7 @@ class Rooms
         @rooms = Hash.new{|h,v| h[v]=Array.new()}
         @rooms['general']=[]
         @sendUserList = senduserlistProc
+        @foreignRooms = {}
     end
     def push(user)
         @rooms[user.room].push(user)
@@ -50,6 +51,19 @@ class Rooms
     def users()
         @rooms.values.flatten
     end
+    def allUsers()
+        users().concat(@foreignRooms.values.flatten).map{|user|{'name'=> user['name'],'room'=>user['room']} }
+    end
+    def allUsersString()
+        "TCPusers :\n #{@rooms.users().map{|user| user[:name]}} \n Other Users:\n#{@foreignRooms.values.flatten.map{|user|user['name']}}"
+    end
+
+    def allRooms()
+        tempCopy = {}
+        @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
+        tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
+        tempCopy
+    end
 
     def keys()
         @rooms.keys
@@ -57,15 +71,22 @@ class Rooms
     def values
         @rooms.values
     end
+
+    def newForeignRooms(rooms)
+        @foreignRooms = rooms
+    end
+    def foreignRooms
+        @foreignRooms
+    end
 end
 class Server 
     def initialize(port, host, name = 'TCPserverHOST')
         @rooms = Rooms.new(Proc.new{sendUserList()})
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
-        @sisterServer = SisterServer.new(9009,'localhost')
+        @sisterServer = SisterServer.new(9009,'localhost',self)
         @messageallProc = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
-        @sisterServer.start(@messageallProc,self)
+        @sisterServer.start(@messageallProc)
         sockaddress = Socket.pack_sockaddr_in(port,host)
         
         @socket.bind(sockaddress)
@@ -113,7 +134,7 @@ class Server
             msg = client.gets.chomp
             p "client handshake: #{msg}"
             if (msg == 's')
-                client.puts "users : #{@rooms.users().map{|user| user[:name]}}"
+                client.puts 
             else
                 release = true
                 user = User.new(client,msg,'general',connection[1])
@@ -199,6 +220,7 @@ class Server
                     @rooms.users().each{|user| puts user[:name]}
                     puts "threads: #{Thread.list.length}"
                     Thread.list.each{|t| puts "thread name:#{t[:name]}"}
+                    puts 'allrooms', @rooms.allRooms()
                     
                 elsif(cmd == 'diss')
                     @rooms.users().each{|user| user.client.close()}
@@ -224,7 +246,9 @@ class Server
         ensure
             Socket.do_not_reverse_lookup = orig
     end
-
+    def newForeignUserlist(frooms)
+        @rooms.newForeignRooms(frooms)
+    end
     def sendUserList
         begin
             @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
@@ -251,7 +275,7 @@ class Server
                 @rooms.changeRoom(originator,command[1])
                 originator.client.puts "changed room to #{command[1]}"
             when 'see'
-                originator.client.puts @rooms.keys.map{|room| [room,@rooms[room].map{|user| user.name}]}
+                originator.client.puts @rooms.allUsers().sort{|a,b| a['room']<=>b['room']}
             when 'seeroom'
                 originator.client.puts [originator.room,@rooms[originator.room].map{|user| user.name}]
             else

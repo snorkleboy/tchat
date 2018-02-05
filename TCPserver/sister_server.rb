@@ -1,18 +1,18 @@
 require 'json'
 class SisterServer
-    def initialize(port, host)
+    def initialize(port, host,tcpserver)
         @SisterSocket = Socket.new(AF_INET, SOCK_STREAM, 0)
         sistersockaddress = Socket.pack_sockaddr_in(port,host)
         @location = [port,host]
         @SisterSocket.bind(sistersockaddress)
         @connected = false
+        @server = tcpserver
     end
 
-    def start(proc,tcpserver)
-        
+    def start(proc)
         p 'sister_server_start'
         p proc
-        p tcpserver
+        p @server
         Thread.new(){
             Thread.current[:name]='Sister Listener'
             @SisterSocket.listen(1)
@@ -31,8 +31,12 @@ class SisterServer
         p "sisterserver listen start, proc=#{proc}"
         while (msg = @client.gets)
             message = JSON.parse(msg)
-            puts "sisterserver listen #{[message,msg]}"
-            proc.call(message)
+            puts "sisterserver listen", message,msg,''
+            if (message['action'] === 'msg')
+                proc.call(message)
+            else
+                sisterController(message)
+            end
         end
         p 'sister connection closing'
         @client.close()
@@ -45,6 +49,16 @@ class SisterServer
             @client.puts(JSON.generate(msg))
         else
             p 'sister server not connected to sister client'
+        end
+    end
+
+    def sisterController(msg)
+        case msg['action']
+            when 'userList'
+                p '','new user list', msg,''
+                @server.newForeignUserlist(msg['payload']['rooms'])
+            else
+                p 'unknown sisterserver command'
         end
     end
 
@@ -94,7 +108,6 @@ class SisterClient
 
     def send(msg)
         if (@connected)
-            msg['action']='msg'
             p '',"sister client puts #{msg}",''
             @socket.puts(JSON.generate(msg))
         else

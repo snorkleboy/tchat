@@ -37,7 +37,8 @@ module Chat
                     @clients.push(wsClient)
                     @rooms[wsClient.room].push(wsClient)
                     # send userlist to frontend
-                    sendUserListToClient()
+                    sendUserListToClients()
+                    sendUserListToSister()
                     p '','clients connected:'
                     p [@clients.count,@clients.map{|client| client.name}]
                 end
@@ -58,6 +59,8 @@ module Chat
                     p '',['websocket closing', ws.object_id, event.code, event.reason],''
                     @clients.delete(wsClient)
                     @rooms[wsClient.room].delete(wsClient)
+                    sendUserListToClients()
+                    sendUserListToSister()
                     ws = nil
                 end
 
@@ -78,18 +81,18 @@ module Chat
                     @rooms.delete(oldRoom) if (oldRoom != 'general' && @rooms[oldRoom].empty?)
                     @rooms[newRoom]= @rooms[newRoom].push(client)
                     client.room = newRoom
-                    sendUserListToClient()
+                    sendUserListToClients()
+                    sendUserListToSister()
                     p 'change room',@rooms
                 else
                     p 'unrecognized webSocketClient command'
             end
         end
 
-        def sendUserListToClient
+        def sendUserListToClients
             tempCopy = {}
             @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
             tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
-            p 'tempcopy',tempCopy
             @clients.each do |client|
                 client.send(JSON.generate({
                     'action'=>'userList',
@@ -98,10 +101,20 @@ module Chat
             end
         end
 
+        def sendUserListToSister
+            tempCopy = {}
+            @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
+            tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
+            @sisterClient.send({
+                'action'=>'userList',
+                'payload'=>{'userList'=>@clients,'rooms'=>tempCopy}
+            })
+        end
+
         def addUsers(payload)
             @foreignUsers = payload['userList']
             @foreignRooms = payload['rooms']
-            sendUserListToClient()
+            sendUserListToClients()
             p 'added users',@rooms,@foreignRooms,''
             
         end
