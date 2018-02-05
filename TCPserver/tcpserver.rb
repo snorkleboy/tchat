@@ -2,7 +2,8 @@
 
 require 'socket'
 require 'thread'
-require_relative "./sister_server"
+require_relative "../util/sister_server"
+require_relative "../util/rooms"
 require 'json'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
@@ -14,71 +15,7 @@ User = Struct.new(:client, :name,:room, :address) do
     end
 end
 
-class Rooms
-    def [](room)
-        @rooms[room]
-    end
-    def rooms=(obj)
-        @rooms = obj
-    end
-    def rooms
-        @rooms
-    end
-    def initialize(senduserlistProc)
-        @rooms = Hash.new{|h,v| h[v]=Array.new()}
-        @rooms['general']=[]
-        @sendUserList = senduserlistProc
-        @foreignRooms = {}
-    end
-    def push(user)
-        @rooms[user.room].push(user)
-        @sendUserList.call()
-    end
 
-    def changeRoom(user,newroom)
-        oldroom = user.room
-        @rooms[oldroom].delete(user)
-        @rooms.delete(oldroom) if (oldroom != 'general' && @rooms[oldroom].empty?)
-        @rooms[newroom] = @rooms[newroom].push(user)
-        user.room = newroom
-        @sendUserList.call()
-    end
-
-    def delete(user)
-        @rooms[user.room].delete(user)
-        @sendUserList.call()
-    end
-    def users()
-        @rooms.values.flatten
-    end
-    def allUsers()
-        users().concat(@foreignRooms.values.flatten).map{|user|{'name'=> user['name'],'room'=>user['room']} }
-    end
-    def allUsersString()
-        "TCPusers :\n #{@rooms.users().map{|user| user[:name]}} \n Other Users:\n#{@foreignRooms.values.flatten.map{|user|user['name']}}"
-    end
-
-    def allRooms()
-        tempCopy = {}
-        @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
-        tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
-        tempCopy
-    end
-
-    def keys()
-        @rooms.keys
-    end
-    def values
-        @rooms.values
-    end
-
-    def newForeignRooms(rooms)
-        @foreignRooms = rooms
-    end
-    def foreignRooms
-        @foreignRooms
-    end
-end
 class Server 
     def initialize(port, host, name = 'TCPserverHOST')
         @rooms = Rooms.new(Proc.new{sendUserList()})

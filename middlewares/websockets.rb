@@ -1,6 +1,8 @@
 require 'faye/websocket'
-require_relative "../TCPserver/sister_server"
+require_relative "../util/sister_server"
 require 'json'
+require_relative "../util/rooms"
+
 module Chat
     class Websockets
         KEEPALIVE_TIME = 15 # in seconds
@@ -9,10 +11,8 @@ module Chat
             @app     = app
             @usersList = [];
             @clients = []
-            @foreignUsers = []
-            @foreignRooms = {}
-            @rooms=Hash.new{|h,k| h[k]=Array.new()}
-            @rooms['general']=[]
+            @rooms=Rooms.new(Proc.new{sendUserListToSister},Proc.new{sendUserListToClients})
+
             begin
                 @sisterClient = SisterClient.new(9009,'localhost', self)
             rescue => exception
@@ -35,10 +35,7 @@ module Chat
                 ws.on :open do |event|
                     p '',['websocket connection opened', ws.object_id]
                     @clients.push(wsClient)
-                    @rooms[wsClient.room].push(wsClient)
-                    # send userlist to frontend
-                    sendUserListToClients()
-                    sendUserListToSister()
+                    @rooms.push(wsClient)
                     p '','clients connected:'
                     p [@clients.count,@clients.map{|client| client.name}]
                 end
@@ -58,9 +55,7 @@ module Chat
                 ws.on :close do |event|
                     p '',['websocket closing', ws.object_id, event.code, event.reason],''
                     @clients.delete(wsClient)
-                    @rooms[wsClient.room].delete(wsClient)
-                    sendUserListToClients()
-                    sendUserListToSister()
+                    @rooms.delete(wsClient)
                     ws = nil
                 end
 
@@ -75,14 +70,8 @@ module Chat
                 when 'roomChange'
                     p 'change room action',msg,client.name,@rooms
                     newRoom = msg['payload']['room']
-                    oldRoom = client.room
 
-                    @rooms[oldRoom].delete(client)
-                    @rooms.delete(oldRoom) if (oldRoom != 'general' && @rooms[oldRoom].empty?)
-                    @rooms[newRoom]= @rooms[newRoom].push(client)
-                    client.room = newRoom
-                    sendUserListToClients()
-                    sendUserListToSister()
+                    @rooms.changeRoom(client,newRoom)
                     p 'change room',@rooms
                 else
                     p 'unrecognized webSocketClient command'
@@ -90,32 +79,26 @@ module Chat
         end
 
         def sendUserListToClients
-            tempCopy = {}
-            @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
-            tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
+            copy = @rooms.allRooms()
             @clients.each do |client|
                 client.send(JSON.generate({
                     'action'=>'userList',
-                    'payload'=>{'userList'=>@clients,'rooms'=>tempCopy}
+                    'payload'=>{'userList'=>@clients,'rooms'=>copy}
                 }))
             end
         end
 
         def sendUserListToSister
-            tempCopy = {}
-            @foreignRooms.each_pair{|k,v| tempCopy[k]=v.map{|client| client}}
-            tempCopy = tempCopy.merge(@rooms){|k,v1,v2| v1.concat(v2)}
+
             @sisterClient.send({
                 'action'=>'userList',
-                'payload'=>{'userList'=>@clients,'rooms'=>tempCopy}
+                'payload'=>{'userList'=>@clients,'rooms'=>@rooms.allRooms()}
             })
         end
 
         def addUsers(payload)
-            @foreignUsers = payload['userList']
-            @foreignRooms = payload['rooms']
-            sendUserListToClients()
-            p 'added users',@rooms,@foreignRooms,''
+            @rooms.newForeignRooms(payload['rooms'])
+            p 'added users',@rooms.allRooms(),''
             
         end
 
