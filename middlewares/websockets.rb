@@ -76,13 +76,10 @@ module Chat
                     p 'change room action',msg,client.name,@rooms
                     newRoom = msg['payload']['room']
                     oldRoom = client.room
-                    p 'oldroom',oldRoom,'newroom',newRoom
-                    
+
                     @rooms[oldRoom].delete(client)
-                    p @rooms[newRoom] 
+                    @rooms.delete(oldRoom) if (oldRoom != 'general' && @rooms[oldRoom].empty?)
                     @rooms[newRoom]= @rooms[newRoom].push(client)
-                    p @rooms[newRoom] 
-                    p @rooms
                     client.room = newRoom
                     @clients.each do |client|
                         client.send(JSON.generate({
