@@ -6,16 +6,22 @@ require_relative "./sister_server"
 require 'json'
 include Socket::Constants
 ESCAPE_CHAR = 'q'
-User = Struct.new(:client, :name,:room, :address)
+
+
+User = Struct.new(:client, :name,:room, :address) do 
+    def to_json(options)
+        {'name'=>name,'room'=>room}.to_json
+    end
+end
 
 class Server 
-    def initialize(port, host, name = 'server')
+    def initialize(port, host, name = 'TCPserverHOST')
         @rooms = {'general'=>[]}
         @rooms.default = []
         @users = []
         # @threads = []
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
-        @sisterServer = SisterServer.new(9000,'localhost')
+        @sisterServer = SisterServer.new(9009,'localhost')
         @messageallProc = Proc.new{|msg| @users[1..-1].each{|user| user.client.puts( "#{msg['handle']}: #{msg['text']}" )}}
         @sisterServer.start(@messageallProc,self)
         sockaddress = Socket.pack_sockaddr_in(port,host)
@@ -47,13 +53,10 @@ class Server
                 rescue => exception
                     p '',"handshake rescue: #{exception}"
                     p self
-                    Thread.Kill self
                 end
                 if (user)
                     thr[:name]=user[:name]
                     read(user)
-                else
-                    Thread.Kill self
                 end
             end
             # @threads.push(thr)
@@ -79,8 +82,12 @@ class Server
 
         @users.push(user)
         @rooms[user.room].push(user)
-        @sisterServer.send({'action'=>'userlist','data'=>{'userlist'=>@users}})
-        user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
+        begin
+            @sisterServer.send({'action'=>'userlist','payload'=>{'userlist'=>@users,'rooms'=>@rooms}})
+        rescue => e
+            p ['send userlist error',e]
+        end
+            user[:client].puts "currently connected: #{@users.map{|user| user[:name]}}"
         user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
         return user
 

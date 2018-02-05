@@ -53,9 +53,10 @@ end
 
 class SisterClient
 
-    attr_accessor :socket
+    attr_accessor :socket, :connected
 
-    def initialize(port, host)
+    def initialize(port, host,parent)
+        @parent = parent
         @port = port
         @host = host
         @socket = nil
@@ -106,6 +107,7 @@ class SisterClient
         case msg['action']
             when 'userlist'
                 p ["new userlist",msg]
+                @parent.addUsers(msg['payload'])
 
             when ''
             

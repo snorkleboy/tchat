@@ -9,10 +9,11 @@ module Chat
             @app     = app
             @usersList = [];
             @clients = []
+            @foreignUsers = []
             @rooms=Hash.new{|h,k| h[k]=Array.new()}
             @rooms['general']=[]
             begin
-                @sisterClient = SisterClient.new(9000,'localhost')
+                @sisterClient = SisterClient.new(9009,'localhost', self)
             rescue => exception
                 p '',[exception,'sister client not connected'],''
             end
@@ -91,6 +92,12 @@ module Chat
                 else
                     p 'unrecognized webSocketClient command'
             end
+        end
+
+        def addUsers(payload)
+            @foreignUsers = payload['userList']
+            @rooms = payload['rooms'].merge(@rooms){|k,v1,v2| v1.concat(v2)}
+            p 'added users',@rooms,@foreignUsers,''
         end
 
 
