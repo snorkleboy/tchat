@@ -9,8 +9,8 @@ module Chat
             @app     = app
             @usersList = [];
             @clients = []
-            @rooms={'general'=>[]}
-            @rooms.default = []
+            @rooms=Hash.new{|h,k| h[k]=Array.new()}
+            @rooms['general']=[]
             begin
                 @sisterClient = SisterClient.new(9000,'localhost')
             rescue => exception
@@ -76,9 +76,14 @@ module Chat
                     p 'change room action',msg,client.name,@rooms
                     newRoom = msg['payload']['room']
                     oldRoom = client.room
-                    client.room = newRoom
+                    p 'oldroom',oldRoom,'newroom',newRoom
+                    
                     @rooms[oldRoom].delete(client)
-                    @rooms[newRoom] = @rooms[newRoom].push(client)
+                    p @rooms[newRoom] 
+                    @rooms[newRoom]= @rooms[newRoom].push(client)
+                    p @rooms[newRoom] 
+                    p @rooms
+                    client.room = newRoom
                     @clients.each do |client|
                         client.send(JSON.generate({
                             'action'=>'userList',
@@ -110,7 +115,7 @@ class Client
         @ws.send(msg)
     end
     def inspect
-        [@name,@room,@tcp]
+        @name
     end
     def to_json(options)
         {'name'=>@name,'room'=>@room,'tcpclient?'=>@tcp}.to_json

@@ -84,11 +84,12 @@ const WSmaker = (store) =>{
 
     //change rooms
     roomChangeButton.addEventListener('click',(e)=>{
-        store.room = roomChangeInput.value
+        store.setRoom(roomChangeInput.value);
+        roomChangeInput.value = ''
         ws.send(JSON.stringify({
             action: 'roomChange',
             payload:{
-                room: roomChangeInput.value
+                room: store.room
             }
         }));
 

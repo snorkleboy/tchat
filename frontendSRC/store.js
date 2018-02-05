@@ -5,10 +5,14 @@ const Store = function(){
     this.rooms = {};
     this.userList={}
     this.msgs = [];
+    this.setRoom = this.setRoom.bind(this);
     this.roomName = this.roomName.bind(this);
 } 
 Store.prototype.roomName = function(){
     return this.room
+}
+Store.prototype.setRoom = function(room){
+    this.room = room;
 }
 
 

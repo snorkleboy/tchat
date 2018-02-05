@@ -128,10 +128,14 @@ var Store = function Store() {
     this.rooms = {};
     this.userList = {};
     this.msgs = [];
+    this.setRoom = this.setRoom.bind(this);
     this.roomName = this.roomName.bind(this);
 };
 Store.prototype.roomName = function () {
     return this.room;
+};
+Store.prototype.setRoom = function (room) {
+    this.room = room;
 };
 
 Store.prototype.changeUserlist = function (rooms, userList) {
@@ -264,11 +268,12 @@ var WSmaker = function WSmaker(store) {
 
     //change rooms
     roomChangeButton.addEventListener('click', function (e) {
-        store.room = roomChangeInput.value;
+        store.setRoom(roomChangeInput.value);
+        roomChangeInput.value = '';
         ws.send(JSON.stringify({
             action: 'roomChange',
             payload: {
-                room: roomChangeInput.value
+                room: store.room
             }
         }));
     });
