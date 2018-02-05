@@ -7,6 +7,7 @@ module Chat
 
     def initialize(app)
         @app     = app
+        @usersList = [];
         @clients = []
         @rooms={'general'=>[]}
         begin
@@ -27,20 +28,18 @@ module Chat
     def call(env)
         if Faye::WebSocket.websocket?(env)
             ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
-
+            wsClient = Client.new(ws,env['PATH_INFO'][1..-1],'general',false)
             ws.on :open do |event|
-                p '','',env.methods,'',env['PATH_INFO']
                 p '',['websocket connection opened', ws.object_id]
-                # p event
-                # make new client object, name is sent in path
-                wsClient = Client.new(ws,env['PATH_INFO'][1..-1],'general',false)
                 @clients.push(wsClient)
                 @rooms[wsClient.room].push(wsClient)
                 # send userlist to frontend
-                wsClient.send(JSON.generate({
+                @clients.each do |client|
+                    client.send(JSON.generate({
                     'action'=>'userList',
-                    'payload'=>{'userList'=>@clients}
+                    'payload'=>{'userList'=>@clients,'rooms'=>@rooms}
                 }))
+                end
                 p '','clients connected:'
                 p [@clients.count,@clients.map{|client| client.name}]
             end
@@ -53,7 +52,8 @@ module Chat
 
             ws.on :close do |event|
                 p '',['websocket closing', ws.object_id, event.code, event.reason],''
-                @clients.delete(ws)
+                @clients.delete(wsClient)
+                @rooms[wsClient.room].delete(wsClient)
                 ws = nil
             end
 
@@ -74,8 +74,12 @@ class Client
         @room=room
         @tcp=tcp
     end
+
     def send(msg)
         @ws.send(msg)
+    end
+    def to_json(options)
+        {'name'=>@name,'room'=>@room,'tcpclient?'=>@tcp}.to_json
     end
 
 

@@ -86,10 +86,23 @@ document.addEventListener('DOMContentLoaded', function () {
     var handlein = document.getElementById('handle-Signin');
     var appholder = document.getElementById('appholder');
     var signin = document.getElementById('signin');
+    var signedIn = false;
+    //one time event
+    //binds enter to signin button then unbinds it (it gets rebound to submit messages)
+    var signInEnter = function signInEnter(e) {
+        if (e.key == 'Enter' && !signedIn) {
+            var signinSubmitel = document.getElementById('signin-submit');
+            signinSubmitel.click();
+            document.removeEventListener('keypress', signInEnter);
+        }
+    };
+    document.addEventListener('keypress', signInEnter);
 
+    //sets name in store and intializes websocket connection
     signinSubmit.addEventListener('click', function () {
-        console.log(handlein.value);
-        (0, _WS2.default)(handlein.value.length > 1 ? handlein.value : 'anon', _store2.default);
+        signedIn = true;
+        _store2.default.handle = handlein.value.length > 1 ? handlein.value : 'anon';
+        (0, _WS2.default)(_store2.default);
         appholder.classList.remove('blur');
         signin.style.display = 'none';
     });
@@ -105,16 +118,33 @@ document.addEventListener('DOMContentLoaded', function () {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var Store = function Store() {
+    this.handle = '';
     this.store = {};
-    this.userList = {};
     this.rooms = {};
+    this.userList = {};
     this.msgs = [];
 };
-Store.prototype.changeUserlist = function (userlist) {
-    var userList = document.getElementById('userList');
-    userlist.forEach(function (user) {
-        console.log('userlist', user);
+Store.prototype.changeUserlist = function (rooms, userList) {
+    this.userList = userList;
+    this.rooms = rooms;
+    var userListEl = document.getElementById('userList');
+    userListEl.innerHTML = '';
+    Object.keys(this.rooms).forEach(function (room) {
+        var roomEl = document.createElement('li');
+        var roomElList = document.createElement('ul');
+        roomEl.innerHTML = '<h1>' + room + '</h1>';
+        roomEl.appendChild(roomElList);
+        userListEl.appendChild(roomEl);
+        rooms[room].forEach(function (user) {
+            console.log('userlist', typeof user === 'undefined' ? 'undefined' : _typeof(user), user);
+            var li = document.createElement('li');
+            li.innerHTML = '<h1>' + user.name + '</h1>';
+            roomElList.appendChild(li);
+        });
     });
 };
 var store = new Store();
@@ -132,15 +162,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 
-var WSmaker = function WSmaker(clientName, store) {
+var WSmaker = function WSmaker(store) {
     // console.log('loaded');
     var subBtn = document.getElementById('submit');
-    var chat = clientName;
+    var handle = store.handle;
     var input = document.getElementById('chatin');
+    input.focus();
     var messageBox = document.getElementById('messageBox');
 
     var scheme = "ws://";
-    var uri = scheme + window.document.location.host + "/" + chat;
+    var uri = scheme + window.document.location.host + "/" + handle;
     var ws = new WebSocket(uri);
 
     // console.log(ws);
@@ -154,10 +185,11 @@ var WSmaker = function WSmaker(clientName, store) {
             messageBox.appendChild(msgEl);
             bottomizeScroll();
         } else {
-            console.log('RECEIVED WS COMMAND', data);
+            console.log('RECEIVED WS COMMAND', data.action, data.payload, data);
             switch (data.action) {
-                case 'userList':
-                    store.changeUserlist(data.payload);
+                case "userList":
+                    store.changeUserlist(data.payload.rooms, data.payload.userList);
+                    break;
                 default:
                     console.log('unknown action', data);
             }
@@ -172,17 +204,11 @@ var WSmaker = function WSmaker(clientName, store) {
         console.log('websocket closing', e);
     };
 
-    ws.onopen = function (e) {
-        ws.send(JSON.stringify({
-            'action': 'newUser',
-            'payload': { 'name': chat, 'room': 'general' }
-        }));
-    };
+    ws.onopen = function (e) {};
 
     subBtn.addEventListener('click', function (e) {
 
         e.preventDefault();
-        var handle = chat.name;
         var text = input.value;
 
         console.log('submit clicked', handle, text);

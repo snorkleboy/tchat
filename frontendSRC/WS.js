@@ -1,14 +1,15 @@
 
 
-const WSmaker = (clientName, store) =>{
+const WSmaker = (store) =>{
     // console.log('loaded');
     const subBtn = document.getElementById('submit');
-    const chat = clientName;
+    const handle = store.handle;
     const input = document.getElementById('chatin');
+    input.focus();
     const messageBox = document.getElementById('messageBox');
 
     const scheme = "ws://";
-    const uri = scheme + window.document.location.host + "/"+chat;
+    const uri = scheme + window.document.location.host + "/"+handle;
     const ws = new WebSocket(uri);
 
     // console.log(ws);
@@ -24,10 +25,11 @@ const WSmaker = (clientName, store) =>{
             messageBox.appendChild(msgEl);
             bottomizeScroll();
         }else{
-            console.log('RECEIVED WS COMMAND',data)
+            console.log('RECEIVED WS COMMAND',data.action,data.payload,data)
             switch(data.action){
-                case 'userList':
-                    store.changeUserlist(data.payload);
+                case "userList":
+                    store.changeUserlist(data.payload.rooms,data.payload.userList);
+                    break;
                 default:
                     console.log('unknown action',data)
             }
@@ -44,16 +46,11 @@ const WSmaker = (clientName, store) =>{
     };
 
     ws.onopen = (e) =>{
-        ws.send(JSON.stringify({
-            'action': 'newUser',
-            'payload':{'name':chat,'room':'general'}
-        }))
     };
 
     subBtn.addEventListener('click',(e)=>{
         
         e.preventDefault();
-        const handle = chat.name;
         const text = input.value;
 
         console.log('submit clicked', handle, text);
