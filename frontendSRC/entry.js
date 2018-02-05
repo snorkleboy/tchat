@@ -1,3 +1,6 @@
+import store from './store';
+import WSmaker from './WS';
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -6,10 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const appholder = document.getElementById('appholder');
     const signin = document.getElementById('signin');
 
-
-    signinSubmit.addEventListener('click',()=>{
+    signinSubmit.addEventListener('click', () => {
         console.log(handlein.value);
-        WSmaker(handlein.value.length > 1 ? handlein.value : 'anon');
+        WSmaker(handlein.value.length > 1 ? handlein.value : 'anon', store);
         appholder.classList.remove('blur');
         signin.style.display = 'none';
     })

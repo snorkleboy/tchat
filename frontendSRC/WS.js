@@ -1,4 +1,6 @@
-const WSmaker = (clientName) =>{
+
+
+const WSmaker = (clientName, store) =>{
     // console.log('loaded');
     const subBtn = document.getElementById('submit');
     const chat = clientName;
@@ -22,7 +24,13 @@ const WSmaker = (clientName) =>{
             messageBox.appendChild(msgEl);
             bottomizeScroll();
         }else{
-            console.log('RECEIVED WS COMMAND!',data)
+            console.log('RECEIVED WS COMMAND',data)
+            switch(data.action){
+                case 'userList':
+                    store.changeUserlist(data.payload);
+                default:
+                    console.log('unknown action',data)
+            }
         }
         
     };
@@ -80,3 +88,5 @@ function bottomizeScroll() {
     var element = document.getElementById("messages");
     element.scrollTop = element.scrollHeight;
 }
+
+export default WSmaker;
