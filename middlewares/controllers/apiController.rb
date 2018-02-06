@@ -1,7 +1,6 @@
 require 'rack'
 require 'json'
-# require 'sequel'
-require 'sinatra'
+require 'sequel'
 module Chat
     class APIController
         def initialize(app)
