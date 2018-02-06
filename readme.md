@@ -1,6 +1,6 @@
 
 # Tchat
- ## A Websocket and TCP instant chat service. 
+ #### A Websocket and TCP instant chat service. 
  
  chat.artemkharshan.com is websocket based instant chat app that you can browse to in a browser.
 
@@ -35,7 +35,7 @@ once signed on you can type messages to send in the cli and messages recieved wi
 '\seeroom'     =>see users in same room
 ```
 
-### TCPserver console commands
+#### TCPserver console commands
 ```
 'see'                   =>shows a list of users and running threads. Note that the server is always user[0].
 'diss'                  =>closes all connections in the User pool
