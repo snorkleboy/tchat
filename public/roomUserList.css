@@ -11,17 +11,4 @@
     left: 15%;
 }
 
-.right-menu input {
-    background-color: white;
-    padding: 15px;
-}
 
-#roomChangeButton{
-    background-color: white;
-    width: fit-content;
-    padding: 20px;
-    transition: 1s all;
-}
-#roomChangeButton:hover{
-    background-color: bisque
-}

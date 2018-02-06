@@ -30,7 +30,7 @@ Store.prototype.changeUserlist = function(rooms,userList){
 
 
         const roomEl = document.createElement('li');
-        roomEl.innerHTML = `<div><button id=roomButton-${i} data-room=${room}>${room}</button><button data-room=${room} id='collapseRoom'>[x]</button</div>`
+        roomEl.innerHTML = `<div><button id=roomButton data-room=${room}>${room}</button><button data-room=${room} id='collapseRoom'>[x]</button</div>`
         roomEl.classList.add('room')
         roomEl.querySelector('#collapseRoom').addEventListener('click',(e)=>{
             roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');

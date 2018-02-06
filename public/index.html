@@ -23,7 +23,7 @@
             <h1>Welcome to Tchat, please enter a username.</h1>
             <h1> the TCP server is on port 90</h1>
             <div class='si-buttons'>
-                <input class='handle' id='handle-Signin' value='anon' type="text" placeholder="Enter name here" autofocus>
+                <input class='handle' id='handle-Signin' type="text" placeholder="Enter name here" autofocus>
                 <input type="submit" id='signin-submit'>
             </div>
             
@@ -32,33 +32,34 @@
     </div>
 
     <main id='appholder' class='appholder blur'>
+        
         <div class='right-menu'>
             <div class='info'>
-                <div id='username'></div>
-                <div id='roomname'></div>
+                <label>User name<div id='username'></div></label>
+                <label>Room name<div id='roomname'></div></label>
+                            
             </div>
             <main class='options'>
-                <div>
+                <div class='changeRoom'>
                     <input id='roomChangeInput' placeholder="roomchange" />
-                    <button id='roomChangeButton'>changeRoom</button>
+                    <button id='roomChangeButton'>[X]</button>
                 </div>
-
                 <div class='users'>
                     <label id='userlistLabel'>Rooms and users</label>
                     <ul id="userList">
-
                     </ul>
                 </div>
-                <div class='options'>options</div>
+                <div class='tcphost'>
+                    <h1> TCP host </h1>
+                <h1>chat.ArtemKharshan.com </h1>
+                <h1>port 90</h1>
+                </div>
             </main>
-
         </div>
 
 
        <main class='chatMain'>
-            <div class='tcphost'>
-                <h1> TCP host on chat.ArtemKharshan.com port 90</h1>
-            </div>
+<h1>Tchat</h1>
             <div class='messageholder'>
                 <div class='messages' id='messages'>
                     <ul class='messageBox' id='messageBox'>
@@ -74,18 +75,21 @@
     </main>
 </body>
 <footer>
-    <h2>Artem Kharshan</h2>
+
+    <h1>Static fileserver/Websocket backend build on Rack for instant chat in the browser. a Ruby TCP socket based server on
+        port 90 for instant chat over TCP, possible from any client like netcat or telnet</h1>
+
     <div class="authorlinks">
+        <h2>Artem Kharshan</h2>
         <a href="https://www.linkedin.com/in/artem-kharshan/">
-            <i class="fa fa-linkedin-square" aria-hidden="true"></i>
+            <i class="fa fa-linkedin-square" aria-hidden="true"></i>-Linkedin
         </a>
         <a href="https://github.com/snorkleboy">
-            <i class="fa fa-github-alt" aria-hidden="true"></i>
+            <i class="fa fa-github-alt" aria-hidden="true"></i> -Github
         </a>
         <a href="http:/www.artemkharshan.com">
-            <i class="fa fa-link"></i>
+            <i class="fa fa-link"></i>-Portfolio Site
         </a>
     </div>
-    <h1>Static static filerserver/Websocket backend build on Rack for instant chat in the browser. a Ruby TCP socket based server on port 90 for instant chat over TCP, possible from any client like netcat or telnet</h1>
 </footer>
 </html>

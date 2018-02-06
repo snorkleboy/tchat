@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         signin.style.display = 'none';
     })
     document.getElementById('userlistLabel').addEventListener('click',(e)=>{
-        console.log('erehhehre')
         document.querySelectorAll('.room').forEach((roomButton)=>{
             roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
         })  

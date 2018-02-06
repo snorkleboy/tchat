@@ -68,6 +68,7 @@ const WSmaker = (store) =>{
         msgEl.innerHTML = `
         <h1>${handle}: ${text}</h1>
         `;
+        msgEl.classList.add('myMessage')
         messageBox.appendChild(msgEl);
         bottomizeScroll();
 

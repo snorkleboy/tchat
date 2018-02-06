@@ -1,22 +1,59 @@
 .right-menu{
-    
-    border: 1px 1px 1px 3px;
+    color: rgb(53, 58, 87);
+    width: 20vw;
     padding: 20px;
-    border: solid rgb(87, 104, 78);
+    border-right: 1px solid grey;
     height: 100%;
     border-radius: 3px;
     background-color: rgb(160, 216, 128);
     height: 100%;
-
+    box-sizing: border-box;
 }
 .right-menu main{
         display: flex;
         flex-direction: column;
         justify-content: center;
 }
+.right-menu input {
+    background-color: white;
+    padding: 10px;
+    width: 80%;
+}
+#roomChangeButton {
+    background-color: white;
+    text-align: center;
+    width: 20%;
+    color: rgb(128, 128, 128);
+    padding: 2px;
+    transition: .35s all;
+    border-left: 1px solid rgb(184, 184, 184);
+}
+
+#roomChangeButton:hover {
+    background-color: rgb(216, 255, 145)
+}
+
 .info{
-    margin: 20px;
     border-bottom: 2px solid lightgrey;
+    /* text-align: center; */
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    background-color: rgb(168, 231, 129);
+}
+.info label{
+    margin: 15px;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    
+}
+.info label h1{
+    background-color: rgb(205, 250, 178);
+    text-align: center;
+}
+.changeRoom{
+    display: flex;
 }
 
 .collapse{
@@ -25,5 +62,4 @@
 
 .collapse ul{
     display: none;
-
 }
