@@ -2,7 +2,7 @@
 # Tchat
  ## A Websocket and TCP instant chat service. 
  
- chat.artemkharshan.com:80 is websocket based instant chat app.
+ chat.artemkharshan.com is websocket based instant chat app that you can browse to in a browser.
 
  chat.artemkharshan.com:90 is a TCP server that impliments instant chat between users directly through TCP. You can use anything from telnet to netcat to connect to it and chat and users on the TCP server seamlessly chat with browser clients and visa versa. 
 
