@@ -3,12 +3,24 @@
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
+    
 }
 .users ul{
 }
-.users li{
+.users li li{
     position: relative;
     left: 15%;
 }
-
+#userlistLabel{
+    cursor: pointer;
+}
+#roomButton{
+    color: brown;
+}
+#userButton{
+    color: rgb(21, 138, 153);
+}
+#userList{
+    border: 1px solid rgb(21, 138, 153);
+}
 

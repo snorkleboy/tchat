@@ -1,7 +1,6 @@
 .right-menu{
     color: rgb(53, 58, 87);
     width: 20vw;
-    padding: 20px;
     border-right: 1px solid grey;
     height: 100%;
     border-radius: 3px;
@@ -9,15 +8,24 @@
     height: 100%;
     box-sizing: border-box;
 }
+
 .right-menu main{
         display: flex;
         flex-direction: column;
         justify-content: center;
+        margin-top: 60%;
 }
 .right-menu input {
     background-color: white;
     padding: 10px;
     width: 80%;
+}
+.tcphost {
+    text-align: center;
+    background-color: rgb(223, 255, 162);
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
 }
 #roomChangeButton {
     background-color: white;
@@ -38,8 +46,13 @@
     /* text-align: center; */
     font-size: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     background-color: rgb(168, 231, 129);
+    box-sizing: border-box;
+}
+.info > div{
+    display: flex;
 }
 .info label{
     padding: 15px;

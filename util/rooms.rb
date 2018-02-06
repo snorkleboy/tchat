@@ -33,6 +33,7 @@ class Rooms
 
     def delete(user)
         @rooms[user.room].delete(user)
+        @rooms.delete(user.room) if (@rooms[user.room].empty?)
         @sendUserListToSister.call()
         @senduserlistToClientsProc.call()
     end
