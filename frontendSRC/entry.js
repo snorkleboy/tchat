@@ -6,9 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const signinSubmit = document.getElementById('signin-submit');
     const handlein = document.getElementById('handle-Signin');
+    handlein.focus();
     const appholder = document.getElementById('appholder');
     const signin = document.getElementById('signin');
     let signedIn = false;
+    const username = document.getElementById('username');
+    const roomname = document.getElementById('roomname')
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
     const signInEnter = function (e){
@@ -24,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     signinSubmit.addEventListener('click', () => {
         signedIn = true;
         store.handle = handlein.value.length > 1 ? handlein.value : 'anon';
+        username.innerHTML=`<h1>${store.handle}</h1>`
+        roomname.innerHTML=`<h1>${store.roomName()}</h1>`
         WSmaker(store);
         appholder.classList.remove('blur');
         signin.style.display = 'none';

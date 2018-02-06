@@ -13,6 +13,7 @@ Store.prototype.roomName = function(){
 }
 Store.prototype.setRoom = function(room){
     this.room = room;
+    document.getElementById('roomname').innerHTML = `<h1>${store.roomName()}</h1>`
 }
 
 
@@ -21,6 +22,10 @@ Store.prototype.changeUserlist = function(rooms,userList){
     this.rooms=rooms;
     const userListEl = document.getElementById('userList');
     userListEl.innerHTML=''
+
+    const roomChangeInput = document.getElementById('roomChangeInput');
+    const roomChangeButton = document.getElementById('roomChangeButton')
+
     Object.keys(this.rooms).forEach((room)=>{
 
 
@@ -44,6 +49,8 @@ Store.prototype.changeUserlist = function(rooms,userList){
         document.querySelectorAll('#roomButton').forEach((button)=>{
             button.addEventListener('click',(e)=>{
                 console.log(button.dataset.room)
+                roomChangeInput.value = button.dataset.room
+                roomChangeButton.click();
             })
         })
 

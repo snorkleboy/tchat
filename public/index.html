@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+    <title>Tchat</title>
 <head>
     <meta charset="UTF-8">
     <script src="./bundle.js"></script>
-    <link rel="stylesheet" href="reset.css">
-    <link rel="stylesheet" href="signin.css">
-    <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="roomUserList.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="reset.css">
+<link rel="stylesheet" href="signin.css">
+<link rel="stylesheet" href="index.css">
+<link rel="stylesheet" href="roomUserList.css">
+<link rel="stylesheet" href="rightMenu.css">
+<link rel="stylesheet" href="footer.css">
 
     <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -17,6 +21,7 @@
     <div id='signin' class='signin'>
         <div class='signin-prompt'>
             <h1>Welcome to Tchat, please enter a username.</h1>
+            <h1> the TCP server is on port 90</h1>
             <div class='si-buttons'>
                 <input class='handle' id='handle-Signin' value='anon' type="text" placeholder="Enter name here" autofocus>
                 <input type="submit" id='signin-submit'>
@@ -25,10 +30,36 @@
         </div>
        
     </div>
+
     <main id='appholder' class='appholder blur'>
-       
-        <div class='messageholder'>
-            <h1>TCP host on chat.artemkharshan.com:90</h1>
+        <div class='right-menu'>
+            <div class='info'>
+                <div id='username'></div>
+                <div id='roomname'></div>
+            </div>
+            <main class='options'>
+                <div>
+                    <input id='roomChangeInput' placeholder="roomchange" />
+                    <button id='roomChangeButton'>changeRoom</button>
+                </div>
+
+                <div class='users'>
+                    <label>Rooms and users</label>
+                    <ul id="userList">
+
+                    </ul>
+                </div>
+                <div class='options'>options</div>
+            </main>
+
+        </div>
+
+
+       <main class='chatMain'>
+            <div class='tcphost'>
+                <h1> TCP host on chat.ArtemKharshan.com port 90</h1>
+            </div>
+            <div class='messageholder'>
                 <div class='messages' id='messages'>
                     <ul class='messageBox' id='messageBox'>
 
@@ -37,22 +68,24 @@
                 <span class='buttons'>
                     <input id='chatin' type="text" placeholder="Enter chat text here!" autofocus>
                     <button class='submit' id='submit' type='submit'>Enter</button>
-                </span>   
-        </div>
-        <div class='right-menu'>
-            <div>
-                <input id='roomChangeInput' placeholder="roomchange" />
-                <button id='roomChangeButton'>changeRoom</button>
+                </span>
             </div>
-
-            <div class='users'>
-                <label>users</label>
-                <ul id="userList">
-                    
-                </ul>
-            </div>
-            <div class='options'>options</div>
-        </div>
+       </main>
     </main>
 </body>
+<footer>
+    <h2>Artem Kharshan</h2>
+    <div class="authorlinks">
+        <a href="https://www.linkedin.com/in/artem-kharshan/">
+            <i class="fa fa-linkedin-square" aria-hidden="true"></i>
+        </a>
+        <a href="https://github.com/snorkleboy">
+            <i class="fa fa-github-alt" aria-hidden="true"></i>
+        </a>
+        <a href="http:/www.artemkharshan.com">
+            <i class="fa fa-link"></i>
+        </a>
+    </div>
+    <h1>Static static filerserver/Websocket backend build on Rack for instant chat in the browser. a Ruby TCP socket based server on port 90 for instant chat over TCP, possible from any client like netcat or telnet</h1>
+</footer>
 </html>

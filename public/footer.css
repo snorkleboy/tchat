@@ -1,0 +1,19 @@
+footer{
+    margin: 10px;
+    margin-top: 50px;
+    /* padding-top: 30px; */
+    border-top: 1px solid rgb(187, 187, 187);
+    width: 99vw;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+h2 h1{
+    margin: 10px;
+    box-sizing: border-box;
+}
+.authorlinks{
+    background-color: aliceblue;
+    margin: 10px;
+}

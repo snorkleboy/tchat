@@ -1,12 +1,14 @@
 .users{
     background-color: rgb(213, 255, 189);
-    width: fit-content;
+    width: 100%;
     padding: 10px;
+    box-sizing: border-box;
 }
-
+.users ul{
+}
 .users li{
     position: relative;
-    left: 5%;
+    left: 15%;
 }
 
 .right-menu input {

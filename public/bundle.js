@@ -84,9 +84,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var signinSubmit = document.getElementById('signin-submit');
     var handlein = document.getElementById('handle-Signin');
+    handlein.focus();
     var appholder = document.getElementById('appholder');
     var signin = document.getElementById('signin');
     var signedIn = false;
+    var username = document.getElementById('username');
+    var roomname = document.getElementById('roomname');
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
     var signInEnter = function signInEnter(e) {
@@ -102,6 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
     signinSubmit.addEventListener('click', function () {
         signedIn = true;
         _store2.default.handle = handlein.value.length > 1 ? handlein.value : 'anon';
+        username.innerHTML = '<h1>' + _store2.default.handle + '</h1>';
+        roomname.innerHTML = '<h1>' + _store2.default.roomName() + '</h1>';
         (0, _WS2.default)(_store2.default);
         appholder.classList.remove('blur');
         signin.style.display = 'none';
@@ -136,6 +141,7 @@ Store.prototype.roomName = function () {
 };
 Store.prototype.setRoom = function (room) {
     this.room = room;
+    document.getElementById('roomname').innerHTML = '<h1>' + store.roomName() + '</h1>';
 };
 
 Store.prototype.changeUserlist = function (rooms, userList) {
@@ -143,6 +149,10 @@ Store.prototype.changeUserlist = function (rooms, userList) {
     this.rooms = rooms;
     var userListEl = document.getElementById('userList');
     userListEl.innerHTML = '';
+
+    var roomChangeInput = document.getElementById('roomChangeInput');
+    var roomChangeButton = document.getElementById('roomChangeButton');
+
     Object.keys(this.rooms).forEach(function (room) {
 
         var roomEl = document.createElement('li');
@@ -165,6 +175,8 @@ Store.prototype.changeUserlist = function (rooms, userList) {
         document.querySelectorAll('#roomButton').forEach(function (button) {
             button.addEventListener('click', function (e) {
                 console.log(button.dataset.room);
+                roomChangeInput.value = button.dataset.room;
+                roomChangeButton.click();
             });
         });
 
