@@ -30,8 +30,8 @@ body{
     word-wrap: break-word;
 }
 .appholder{
-    height: 80vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     background-color: rgb(186, 252, 147);
     display: flex;
     align-content: center;
