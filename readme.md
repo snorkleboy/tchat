@@ -1,10 +1,10 @@
 
 # Tchat
-### A Websocket and TCP instant chat service. chat.artemkharshan.com:80 is websocket based instant chat app.
+ A Websocket and TCP instant chat service. chat.artemkharshan.com:80 is websocket based instant chat app.
 
-### chat.artemkharshan.com:90 is a TCP server that impliments instant chat between users directly through TCP. You can use anything from telnet to netcat to connect to it and chat and users on the TCP server seamlessly chat with browser clients and visa versa. 
+ chat.artemkharshan.com:90 is a TCP server that impliments instant chat between users directly through TCP. You can use anything from telnet to netcat to connect to it and chat and users on the TCP server seamlessly chat with browser clients and visa versa. 
 
-### Users on both servers can seemlessy chat with eachother and make and join chat rooms.  
+ Users on both servers can seemlessy chat with eachother and make and join chat rooms.  
 
 
 
@@ -23,10 +23,10 @@ once signed on you can type messages to send in the cli and messages recieved wi
 
 #### TCPclient commands
 ```
-                     '\help'        =>shows commands
-                     '\croom room'=>change rooms to 'room'
-                     '\see'         =>see all rooms and users
-                     '\seeroom'     =>see users in same room
+'\help'        =>shows commands
+'\croom room'  =>change rooms to 'room'
+'\see'         =>see all rooms and users
+'\seeroom'     =>see users in same room
 ```
 
 ### TCPserver console commands
