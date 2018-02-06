@@ -1,6 +1,6 @@
 require 'rack'
 require 'json'
-require 'sequel'
+# require 'sequel'
 require 'sinatra'
 module Chat
     class APIController
