@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     //sets name in store and intializes websocket connection
     signinSubmit.addEventListener('click', () => {
         signedIn = true;
-        store.handle = handlein.value.length > 1 ? handlein.value : 'anon';
+        console.log(handlein.value);
+        const handle = handlein.value.replace(/\s+/g, '');
+        store.handle = handle.length > 1 ? handle : 'anon';
         username.innerHTML=`<h1>${store.handle}</h1>`
         roomname.innerHTML=`<h1>${store.roomName()}</h1>`
         WSmaker(store);

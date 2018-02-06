@@ -12,11 +12,10 @@ const WSmaker = (store) =>{
     const roomChangeButton = document.getElementById('roomChangeButton')
 
     const scheme = "ws://";
-    const uri = scheme + window.document.location.host + "/"+handle;
+    const uri = scheme + window.document.location.host + "/" + handle.replace(/\s+/g, '');;
     const ws = new WebSocket(uri);
 
     ws.onmessage = (msg)=>{
-        // console.log('received:',msg);
         const data = JSON.parse(msg.data);
         if (data.action === 'msg'){
             const msgEl = document.createElement('li');

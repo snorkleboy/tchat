@@ -104,7 +104,9 @@ document.addEventListener('DOMContentLoaded', function () {
     //sets name in store and intializes websocket connection
     signinSubmit.addEventListener('click', function () {
         signedIn = true;
-        _store2.default.handle = handlein.value.length > 1 ? handlein.value : 'anon';
+        console.log(handlein.value);
+        var handle = handlein.value.replace(/\s+/g, '');
+        _store2.default.handle = handle.length > 1 ? handle : 'anon';
         username.innerHTML = '<h1>' + _store2.default.handle + '</h1>';
         roomname.innerHTML = '<h1>' + _store2.default.roomName() + '</h1>';
         (0, _WS2.default)(_store2.default);
@@ -222,11 +224,10 @@ var WSmaker = function WSmaker(store) {
     var roomChangeButton = document.getElementById('roomChangeButton');
 
     var scheme = "ws://";
-    var uri = scheme + window.document.location.host + "/" + handle;
+    var uri = scheme + window.document.location.host + "/" + handle.replace(/\s+/g, '');;
     var ws = new WebSocket(uri);
 
     ws.onmessage = function (msg) {
-        // console.log('received:',msg);
         var data = JSON.parse(msg.data);
         if (data.action === 'msg') {
             var msgEl = document.createElement('li');
