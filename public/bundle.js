@@ -224,7 +224,7 @@ var WSmaker = function WSmaker(store) {
     var roomChangeButton = document.getElementById('roomChangeButton');
 
     var scheme = "ws://";
-    var uri = scheme + window.document.location.host + "/" + handle.replace(/\s+/g, '');;
+    var uri = scheme + window.document.location.host + "/" + handle;
     var ws = new WebSocket(uri);
 
     ws.onmessage = function (msg) {

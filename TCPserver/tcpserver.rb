@@ -82,6 +82,7 @@ class Server
         @rooms.push(user)
         user[:client].puts "currently connected: #{@rooms.users().map{|user| user[:name]}}"
         user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
+        user[:client].puts "\\help for help"
         return user
 
     end
@@ -202,7 +203,7 @@ class Server
         command[0] = command[0][1..-1]
         p ['client command',command, originator]
         case command[0]
-            when 'help'
+            when 'help' || 'h'
                 originator.client.puts [
                      ['\\croom {room}','change rooms to {room}'],
                      ['\\see','see all rooms and users'],

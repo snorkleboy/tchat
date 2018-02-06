@@ -42,7 +42,7 @@ module Chat
 
                 ws.on :message do |event|
                     msg = JSON.parse(event.data)
-                    p '',['websocket message event', msg,event.data],''
+                    p '',['websocket message event', msg],''
                     if (msg['action'] === 'msg')
                         @rooms[msg['room']].each{|client| client.send(event.data) unless client.ws==ws }
                         @sisterClient.send(msg)
