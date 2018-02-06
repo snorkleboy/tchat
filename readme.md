@@ -15,7 +15,7 @@
  sudo rackup -E production -p 80 -o 0.0.0.0
  ```
  *you should start the tcpserver first for the servers to connect to each other correctly
- *setting the rackup server to production is important even in development mode as Faye websockets cant hijack right in Puma dev mode.
+ *setting the rackup server to production is important even in development mode as Faye websockets cant hijack right in dev mode.
  
 ## TCP side
 
