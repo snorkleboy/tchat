@@ -5,8 +5,8 @@ module Chat
     class APIController
         def initialize(app)
             @app=app
-            db = Sequel.connect(adapter: :postgres, user: 'snorkleboy', host: '/var/run/postgresql', port: 5432,
-  database: 'chat', max_connections: 10)
+            db = Sequel.connect(adapter: :postgres, user: 'snorkleboy', host: 'localhost', port: 5432,
+  database: 'chat', max_connections: 10, password:'9252623278')
             p ['connected to postgreSQL',db]
 
 
