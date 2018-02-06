@@ -111,6 +111,12 @@ document.addEventListener('DOMContentLoaded', function () {
         appholder.classList.remove('blur');
         signin.style.display = 'none';
     });
+    document.getElementById('userlistLabel').addEventListener('click', function (e) {
+        console.log('erehhehre');
+        document.querySelectorAll('.room').forEach(function (roomButton) {
+            roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
+        });
+    });
 });
 
 /***/ }),
@@ -153,12 +159,14 @@ Store.prototype.changeUserlist = function (rooms, userList) {
     var roomChangeInput = document.getElementById('roomChangeInput');
     var roomChangeButton = document.getElementById('roomChangeButton');
 
-    Object.keys(this.rooms).forEach(function (room) {
+    Object.keys(this.rooms).forEach(function (room, i) {
 
         var roomEl = document.createElement('li');
-        roomEl.innerHTML = '<button id=\'roomButton\' data-room=' + room + '>' + room + '</button>';
+        roomEl.innerHTML = '<div><button id=roomButton-' + i + ' data-room=' + room + '>' + room + '</button><button data-room=' + room + ' id=\'collapseRoom\'>[x]</button</div>';
         roomEl.classList.add('room');
-
+        roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
+            roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
+        });
         var roomElList = document.createElement('ul');
         roomElList.classList.add('roomUserList');
 

@@ -18,3 +18,12 @@
     margin: 20px;
     border-bottom: 2px solid lightgrey;
 }
+
+.collapse{
+
+}
+
+.collapse ul{
+    display: none;
+
+}
