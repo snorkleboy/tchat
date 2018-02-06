@@ -19,6 +19,8 @@
  *you should start the tcpserver first for the servers to connect to each other correctly
  *setting the rackup server to production is important even in development mode as Faye websockets cant hijack right in dev mode.
  
+ other than NPM installing (javascript) and Bundle installing(ruby) in the folder it also requires a postgres database. 
+ 
 ## TCP side
 
 ### TCPclient
