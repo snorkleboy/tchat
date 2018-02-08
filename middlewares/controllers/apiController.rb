@@ -10,16 +10,27 @@ module Chat
             @routes = routes=Rack::URLMap.new(
                 '/testpost' =>lambda do |env|
 
-                    #set uri
+                    req = Rack::Request.new(env)
+                    p (req.params)
+                    p req.params['json']
+                    p req.params['json']['username']
+                    p JSON.parse(req.params['json'])['username']
                     
-                    user = {username: "username",password:'password'}
-                    uri = URI.parse("http://localhost:6000/user")
-                    res = Net::HTTP.post_form(uri, user)
+                    # p a['username']
+                    begin
+                        #set uri
+                        # user = {username: "username",password:'password'}
+                        uri = URI.parse("http://localhost:6000/user")
+                        res = Net::HTTP.post_form(uri, JSON.parse(req.params['json']))
 
-                    if res.is_a?(Net::HTTPSuccess)
-                            [200, { 'Content-Type' => 'application/json' }, [(res.body)]]
-                    else
-                            [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
+                        if res.is_a?(Net::HTTPSuccess)
+                                [200, { 'Content-Type' => 'application/json' }, [res.body]]
+                        else
+                                [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
+                        end
+                        
+                    rescue => exception
+                        [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>exception})]]
                     end
 
                 end,
@@ -28,7 +39,7 @@ module Chat
                         uri = URI("http://localhost:6000/user")
                         res = Net::HTTP.get_response(uri)
                         if res.is_a?(Net::HTTPSuccess)
-                            [200, { 'Content-Type' => 'application/json' }, [(res.body)]]
+                            [200, { 'Content-Type' => 'application/json' }, [res.body]]
                         else
                             [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
                         end
