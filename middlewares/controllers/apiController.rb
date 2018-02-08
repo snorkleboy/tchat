@@ -10,18 +10,15 @@ module Chat
             @routes = routes=Rack::URLMap.new(
                 '/testpost' =>lambda do |env|
 
-                    req = Rack::Request.new(env)
-                    p (req.params)
-                    p req.params['json']
-                    p req.params['json']['username']
-                    p JSON.parse(req.params['json'])['username']
-                    
-                    # p a['username']
+                    req = Rack::Request.new(env)          
+                    p req.params
+                    params = JSON.parse(req.body.read)
+                    p params
                     begin
                         #set uri
                         # user = {username: "username",password:'password'}
                         uri = URI.parse("http://localhost:6000/user")
-                        res = Net::HTTP.post_form(uri, JSON.parse(req.params['json']))
+                        res = Net::HTTP.post_form(uri, params)
 
                         if res.is_a?(Net::HTTPSuccess)
                                 [200, { 'Content-Type' => 'application/json' }, [res.body]]
