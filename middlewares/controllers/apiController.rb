@@ -1,6 +1,23 @@
 require 'rack'
 require 'json'
 require 'net/http'
+
+# sample javascript fetch
+
+# var payload = {
+#     username: 'timl',
+#     password: 'pass'
+# };
+
+
+# fetch("http://localhost:3000/api/testpost",
+# {
+#     method: "POST",
+#     body: JSON.stringify(payload)
+# })
+# .then(function(res){ return res.json(); })
+# .then(function(data){ console.log( JSON.stringify( data ) ) })
+
 module Chat
     class APIController
         def initialize(app)
@@ -8,15 +25,13 @@ module Chat
 
 
             @routes = routes=Rack::URLMap.new(
-                '/testpost' =>lambda do |env|
+                '/signup' =>lambda do |env|
+                    req = Rack::Request.new(env)      
 
-                    req = Rack::Request.new(env)          
-                    p req.params
-                    params = JSON.parse(req.body.read)
-                    p params
                     begin
+                        params = JSON.parse(req.body.read)
+                        p ['api controller, post user',params]
                         #set uri
-                        # user = {username: "username",password:'password'}
                         uri = URI.parse("http://localhost:6000/user")
                         res = Net::HTTP.post_form(uri, params)
 
@@ -31,6 +46,36 @@ module Chat
                     end
 
                 end,
+                '/login' =>lambda do |env|
+                    
+                    request = Rack::Request.new(env) 
+                    jwt = request.get_header('HTTP_AUTHENTICATION')
+                    # request.add_field 'Authorization', 'huda7da97hre3rhr1yrh0130409u1u'
+                    begin
+                        params = JSON.parse(request.body.read)
+                        p ['api controller, login',params, jwt]
+                        #set uri
+                        uri = URI.parse("http://localhost:6000/login")
+                        req = Net::HTTP::Post.new(uri)
+                        req['authentication'] = jwt
+
+                        res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+                            http.request(req)
+                        end
+
+                        if res.is_a?(Net::HTTPSuccess)
+                                [200, { 'Content-Type' => 'application/json' }, [res.body]]
+                        else
+                                [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
+                        end
+                        
+                    rescue => exception
+                        [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>exception})]]
+                    end
+
+                end,
+
+                 
                 '/testget' =>lambda do |env|
                     begin
                         uri = URI("http://localhost:6000/user")
