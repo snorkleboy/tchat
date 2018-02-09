@@ -356,7 +356,6 @@ authSeq.prototype.changeToLogin = function (handle, store) {
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', function () {
         console.log("login", input.value);
-        console.log((0, _API.login)({ username: handle, password: input.value }));
         (0, _API.login)({ username: handle, password: input.value }).then(function (res) {
             console.log('succesful login', res);
             _this3.finalize(handle, store, res.token);
@@ -437,7 +436,7 @@ var WSmaker = function WSmaker(store, token) {
             bottomizeScroll();
         } else {
             console.log('RECEIVED WS COMMAND', data.action, data.payload, data);
-            controller(data);
+            controller(data, store);
         }
     };
 
@@ -494,7 +493,7 @@ var WSmaker = function WSmaker(store, token) {
         }));
     });
 };
-function controller(data) {
+function controller(data, store) {
     switch (data.action) {
         case "userList":
             store.changeUserlist(data.payload.rooms, data.payload.userList);

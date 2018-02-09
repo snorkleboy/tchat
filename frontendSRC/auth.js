@@ -78,7 +78,6 @@ authSeq.prototype.changeToLogin = function(handle,store){
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', () => {
         console.log("login", input.value)
-        console.log(login({ username: handle, password: input.value }));
         login({ username: handle, password: input.value })
         .then(
             (res)=>{

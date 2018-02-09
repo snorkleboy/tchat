@@ -95,7 +95,7 @@ module Chat
 
         def sendUserListToClients
             copy = @rooms.allRooms()
-            @clients.each do |client|
+            @rooms.values.each do |client|
                 client.send(JSON.generate({
                     'action'=>'userList',
                     'payload'=>{'userList'=>@clients,'rooms'=>copy}

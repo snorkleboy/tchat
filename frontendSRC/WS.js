@@ -26,7 +26,7 @@ const WSmaker = (store,token) =>{
             bottomizeScroll();
         }else{
             console.log('RECEIVED WS COMMAND',data.action,data.payload,data)
-            controller(data)
+            controller(data,store)
         }
         
     };
@@ -90,7 +90,7 @@ const WSmaker = (store,token) =>{
     })
 
 };
-function controller(data){
+function controller(data,store){
     switch (data.action) {
         case "userList":
             store.changeUserlist(data.payload.rooms, data.payload.userList);
