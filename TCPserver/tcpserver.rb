@@ -5,6 +5,8 @@ require 'thread'
 require_relative "../util/sister_server"
 require_relative "../util/rooms"
 require 'json'
+require_relative "../util/dbServerApi"
+require_relative "./clientController"
 include Socket::Constants
 ESCAPE_CHAR = 'q'
 
@@ -43,7 +45,7 @@ class Server
         # If tcpclient it reads and broadcasts messages from it, otherwise it closes the connection in handhsake and then kills the thread.
         while(true) do
             thr = Thread.start(@socket.accept) do |connection| 
-                
+                user = nil
                 p '',"server accepted :#{connection}"
                 begin
                     # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
@@ -67,18 +69,20 @@ class Server
         client = connection[0]
         client.puts "welcome to Tchat"
         while (!release)
-            client.puts "please enter a username. to see who is on enter 's'"
-            msg = client.gets.chomp
-            p "client handshake: #{msg}"
-            if (msg == 's')
-                client.puts 
+            username = get_username(client)
+            registered = checkUser({'username'=>username})
+            p '',registered,'registered',''
+            registered = JSON.parse(registered[1])['isuser']
+            if registered
+                password = get_password(client,registered,username)
+                release = password ? login(client,username,password) : false
             else
-                release = true
-                user = User.new(client,msg,'general',connection[1])
-                p '',"new user: #{user}",''
-            end 
+                password = get_password(client,registered,username)
+                release = password ? signIn(client,username,password) : false
+            end
         end
-
+        user = User.new(client,username,'general',connection[1])
+        p '',"new user: #{user}"
         @rooms.push(user)
         user[:client].puts "currently connected: #{@rooms.users().map{|user| user[:name]}}"
         user[:client].puts "current rooms: #{@rooms.keys.map{|room| room}}"
@@ -86,7 +90,6 @@ class Server
         return user
 
     end
-
     def read(user)
         # encoding is for rare cases of someone trying to send something like control-c (^c), which throws a 'cant convert ancci to utf' error.
         begin
@@ -100,7 +103,7 @@ class Server
                         p '',"write error #{exception}",''
                     end
                 else
-                    clientMessageController(msg,user)
+                    ClientController.act(msg,user,@rooms)
                 end
 
             end
@@ -195,36 +198,58 @@ class Server
         end
     end
 
-    #if msg comes in with '\' as first charecter it gets sent to this controller
-    # msg syntax is \'command' 'parameter'
-    # like '\croom general' to change to room 'general'
-    def clientMessageController(msg, originator)
-        command = msg.split(' ')
-        command[0] = command[0][1..-1]
-        p ['client command',command, originator]
-        case command[0]
-            when 'help' || 'h'
-                originator.client.puts [
-                     ['\\croom {room}','change rooms to {room}'],
-                     ['\\see','see all rooms and users'],
-                     ['\\seeroom','see users in same room']
-                ]
-            when 'croom'
-                @rooms.changeRoom(originator,command[1])
-                originator.client.puts "changed room to #{command[1]}"
-            when 'see'
-                originator.client.puts @rooms.allUsers().sort{|a,b| a['room']<=>b['room']}
-            when 'seeroom'
-                originator.client.puts [originator.room,@rooms[originator.room].map{|user| user.name}]
-            else
-                p 'unknown client command'
-                originator.puts 'SERVER WARNING:unknown command'
-        end
 
-    end
 
 end
 
+def get_username(client)
+    while(true)
+        client.puts "please enter a username.to see who is on enter 's'"
+        msg = client.gets.chomp
+        p "client username input: #{msg}"
+        if (msg == 's')
+            client.puts @rooms.allUsers()
+        else
+            return msg
+        end
+    end
+end
+def get_password(client,registered,username)
+    while(true)
+        display = registered ?
+            "Hi, #{username},please enter a password. or press Q to sign in as different user"
+        : 
+            "hi new user, enter a password to make a new account, or enter q to enter a different username"
+        client.puts display
+        msg = client.gets.chomp
+        p "client password input: #{msg}"
+        if (msg == 'q' || msg == 'Q')
+            return false
+        else    
+            return msg
+        end
+    end
+end
+def signIn(client,username,password)
+    res = postUser({username:username,password:password})
+    if (res[0])
+        client.puts 'signed in!'
+        return true
+    else
+        client.puts "error! #{res[1]}"
+        return false
+    end
+end
+def login(client,username,password)
+    res = postSession({username:username,password:password})
+    if (res[0])
+        client.puts 'logged in!'
+        return true
+    else
+        client.puts "error! #{res[1]}"
+        return false
+    end
+end
 
 server = Server.new(ARGV[0] || 9876,ARGV[1] || 'localhost')
 
