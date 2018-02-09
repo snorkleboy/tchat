@@ -1,6 +1,6 @@
 
 
-const WSmaker = (store) =>{
+const WSmaker = (store,token) =>{
     // console.log('loaded');
     const subBtn = document.getElementById('submit');
     const handle = store.handle;
@@ -12,7 +12,7 @@ const WSmaker = (store) =>{
     const roomChangeButton = document.getElementById('roomChangeButton')
 
     const scheme = "ws://";
-    const uri = scheme + window.document.location.host + "/"+handle;
+    const uri = scheme + window.document.location.host + "/" + handle + '/' + token;
     const ws = new WebSocket(uri);
 
     ws.onmessage = (msg)=>{

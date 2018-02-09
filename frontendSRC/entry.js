@@ -26,12 +26,18 @@ const startup = () => {
 
 
     guestSignIn.addEventListener('click',()=>{
-        guest().then((res)=>{
-            signinSubmit.removeEventListener('click', signinClickHandle);
-            console.log(res)
-            authSeq.finalize('guest',store,res);
-        });
-
+        guest()
+        .then(
+            (res)=>{
+                signinSubmit.removeEventListener('click', signinClickHandle);
+                console.log(res)
+                authSeq.finalize('guest',store,res.token);
+            },
+            (error) => {
+                const text = document.getElementById('signin').querySelector('h1')
+                console.log(error);
+                text.innerText = `${error.error}`;
+            });
     })
 };
 

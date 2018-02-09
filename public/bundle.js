@@ -190,7 +190,11 @@ var startup = function startup() {
         (0, _API.guest)().then(function (res) {
             signinSubmit.removeEventListener('click', signinClickHandle);
             console.log(res);
-            _auth2.default.finalize('guest', store, res);
+            _auth2.default.finalize('guest', store, res.token);
+        }, function (error) {
+            var text = document.getElementById('signin').querySelector('h1');
+            console.log(error);
+            text.innerText = '' + error.error;
         });
     });
 };
@@ -300,7 +304,9 @@ authSeq.prototype.passwordSetup = function (handle, store) {
 };
 
 authSeq.prototype.finalize = function (handle, store, token) {
+    // console.log(token.token);
     store.setHandle(handle.length > 1 ? handle : 'anon');
+    store.setRoom('general');
     store.signedIn = true;
     appholder.classList.remove('blur');
     signin.style.display = 'none';
@@ -324,7 +330,7 @@ authSeq.prototype.changeToSignUp = function (handle, store) {
         console.log("signing", input.value);
         (0, _API.signup)({ username: handle, password: input.value }).then(function (res) {
             console.log(res);
-            _this2.finalize(handle, store, res);
+            _this2.finalize(handle, store, res.token);
         }, function (error) {
             console.log('errorure:', error);
             text.innerText = error;
@@ -347,8 +353,8 @@ authSeq.prototype.changeToLogin = function (handle, store) {
         console.log("login", input.value);
         console.log((0, _API.login)({ username: handle, password: input.value }));
         (0, _API.login)({ username: handle, password: input.value }).then(function (res) {
-            console.log(res);
-            _this3.finalize(handle, store, res);
+            console.log('succesful login', res);
+            _this3.finalize(handle, store, res.token);
         }, function (error) {
             console.log(error);
             text.innerText = handle + ' - ' + error;
@@ -402,7 +408,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 
-var WSmaker = function WSmaker(store) {
+var WSmaker = function WSmaker(store, token) {
     // console.log('loaded');
     var subBtn = document.getElementById('submit');
     var handle = store.handle;
@@ -414,7 +420,7 @@ var WSmaker = function WSmaker(store) {
     var roomChangeButton = document.getElementById('roomChangeButton');
 
     var scheme = "ws://";
-    var uri = scheme + window.document.location.host + "/" + handle;
+    var uri = scheme + window.document.location.host + "/" + handle + '/' + token;
     var ws = new WebSocket(uri);
 
     ws.onmessage = function (msg) {

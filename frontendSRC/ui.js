@@ -20,6 +20,8 @@ class UI{
             }
         }
         document.addEventListener('keypress', signInEnter);
+
+        
     }
 
     makeName(handle){

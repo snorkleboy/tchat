@@ -31,7 +31,9 @@ authSeq.prototype.passwordSetup = function(handle,store){
 }
 
 authSeq.prototype.finalize = function(handle,store,token){
+    // console.log(token.token);
     store.setHandle(handle.length > 1 ? handle : 'anon');
+    store.setRoom('general');
     store.signedIn = true;
     appholder.classList.remove('blur');
     signin.style.display = 'none';
@@ -55,7 +57,7 @@ authSeq.prototype.changeToSignUp = function(handle,store){
         .then(
             (res)=>{
                 console.log(res)
-                this.finalize(handle,store,res);
+                this.finalize(handle,store,res.token);
             },
             (error)=>{
                 console.log('errorure:',error);
@@ -80,8 +82,8 @@ authSeq.prototype.changeToLogin = function(handle,store){
         login({ username: handle, password: input.value })
         .then(
             (res)=>{
-                console.log(res);
-                this.finalize(handle,store,res);
+                console.log('succesful login',res);
+                this.finalize(handle,store,res.token);
             },
             (error)=>{
                 console.log(error);

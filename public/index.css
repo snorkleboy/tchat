@@ -94,6 +94,7 @@ body{
     width: fit-content;
     height: fit-content;
     border-radius: 5px;
+    color: rgb(102, 102, 102);
     transition: 1s all;
     padding: 5px 8px 5px 8px;
     margin: 0 5px 0 15px;

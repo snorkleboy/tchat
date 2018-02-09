@@ -31,13 +31,28 @@ module Chat
         def call(env)
             if Faye::WebSocket.websocket?(env)
                 ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
-                wsClient = Client.new(ws,env['PATH_INFO'][1..-1],'general',true)
+
+                
+                temp=  env['PATH_INFO'].split('/')
+                name, token = temp[1],temp[2]
+                p temp
+                wsClient = Client.new(ws,name,'general',true)
                 ws.on :open do |event|
                     p '',['websocket connection opened', ws.object_id]
-                    @clients.push(wsClient)
-                    @rooms.push(wsClient)
-                    p '','clients connected:'
-                    p [@clients.count,@clients.map{|client| client.name}]
+
+                    params = ({username:name,token:token})
+                    uri = URI.parse("http://localhost:6000/tokencheck")
+                    res = Net::HTTP.post_form(uri, params)
+                    if res.is_a?(Net::HTTPSuccess)
+                        @clients.push(wsClient)
+                        @rooms.push(wsClient)
+                        p '','clients connected:'
+                        p [@clients.count,@clients.map{|client| client.name}]
+                    else
+                        ws.send(JSON.generate({'error'=>"incorrect token"}))
+                        ws.close;
+                    end
+                    
                 end
 
                 ws.on :message do |event|
