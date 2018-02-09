@@ -38,7 +38,7 @@ module Chat
                         if res.is_a?(Net::HTTPSuccess)
                                 [200, { 'Content-Type' => 'application/json' }, [res.body]]
                         else
-                                [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
+                                [400, { 'Content-Type' => 'application/json' },[res.body]]
                         end
                         
                     rescue => exception
@@ -46,27 +46,34 @@ module Chat
                     end
 
                 end,
+#  sample login fetch
+#                 var payload = {
+#     username: 'timl',
+#     password: 'pass'
+# };
+
+
+# fetch("http://localhost:3000/api/login",
+# {
+#   method: "POST",
+#   body: JSON.stringify(payload),
+# 	headers:new Headers({'authentication':'jwt start'})
+# })
+# .then(function(res){ return res.json(); })
+# .then(function(data){ console.log( JSON.stringify( data ) ) })
                 '/login' =>lambda do |env|
-                    
                     request = Rack::Request.new(env) 
-                    jwt = request.get_header('HTTP_AUTHENTICATION')
-                    # request.add_field 'Authorization', 'huda7da97hre3rhr1yrh0130409u1u'
+
                     begin
                         params = JSON.parse(request.body.read)
-                        p ['api controller, login',params, jwt]
+                        p ['api controller, login',params]
                         #set uri
                         uri = URI.parse("http://localhost:6000/login")
-                        req = Net::HTTP::Post.new(uri)
-                        req['authentication'] = jwt
-
-                        res = Net::HTTP.start(uri.hostname, uri.port) do |http|
-                            http.request(req)
-                        end
-
+                        res = Net::HTTP.post_form(uri, params)
                         if res.is_a?(Net::HTTPSuccess)
                                 [200, { 'Content-Type' => 'application/json' }, [res.body]]
                         else
-                                [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
+                                [400, { 'Content-Type' => 'application/json' },[res.body]]
                         end
                         
                     rescue => exception
@@ -74,29 +81,22 @@ module Chat
                     end
 
                 end,
-
-                 
-                '/testget' =>lambda do |env|
-                    begin
-                        uri = URI("http://localhost:6000/user")
-                        res = Net::HTTP.get_response(uri)
-                        if res.is_a?(Net::HTTPSuccess)
-                            [200, { 'Content-Type' => 'application/json' }, [res.body]]
-                        else
-                            [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>res.value})]]
-                        end
-                    rescue => exception
-                        [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>exception})]]
-                        
-                    end
-                    
-                end
             )
         end
 
         def call(env)
-            p '',['api controller'],''
+            p ['api controller']
             @routes.call(env)
+        end
+
+        def auth()
+                        # jwt = request.get_header('HTTP_AUTHENTICATION')
+                        # req = Net::HTTP::Post.new(uri)
+                        # req['authentication'] = jwt
+                        
+                        # res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+                        #     http.request(req)
+                        # end
         end
     end
 end 
