@@ -325,9 +325,9 @@ authSeq.prototype.changeToSignUp = function (handle, store) {
         (0, _API.signup)({ username: handle, password: input.value }).then(function (res) {
             console.log(res);
             _this2.finalize(handle, store, res);
-        }, function (fail) {
-            console.log('failure:', fail);
-            text.innerText = fail;
+        }, function (error) {
+            console.log('errorure:', error);
+            text.innerText = error;
         });
     });
 };
@@ -349,9 +349,9 @@ authSeq.prototype.changeToLogin = function (handle, store) {
         (0, _API.login)({ username: handle, password: input.value }).then(function (res) {
             console.log(res);
             _this3.finalize(handle, store, res);
-        }, function (fail) {
-            console.log(fail);
-            text.innerText = fail;
+        }, function (error) {
+            console.log(error);
+            text.innerText = handle + ' - ' + error;
         });
     });
 };
@@ -366,13 +366,13 @@ authSeq.prototype.signInInitialHandleMaker = function (store) {
         signinSubmit.parentElement.replaceChild(clone, signinSubmit);
         signinSubmit = clone;
         var handlein = document.getElementById('handle-Signin');
+        handlein.value = '';
+        handlein.placeholder = 'enter unique username';
         handlein.focus();
         var appholder = document.getElementById('appholder');
         var signin = document.getElementById('signin');
         var signedIn = false;
 
-        var input = document.getElementById('handle-Signin');
-        input.placeholder = 'enter username';
         var text = signin.querySelector('h1');
         text.innerText = 'Welcome To Chat, please enter a name or press guest';
 
