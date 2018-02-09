@@ -150,7 +150,7 @@ var _auth2 = _interopRequireDefault(_auth);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var startup = function startup() {
-
+    var store = new _store2.default();
     var signinSubmit = document.getElementById('signin-submit');
     var handlein = document.getElementById('handle-Signin');
     handlein.focus();
@@ -158,41 +158,30 @@ var startup = function startup() {
     var signin = document.getElementById('signin');
     var guestSignIn = document.getElementById('signin-guest');
 
-    //one time event
-    //binds enter to signin button then unbinds it (it gets rebound to submit messages)
-
     var signInEnter = function signInEnter(e) {
-        if (!_store2.default.signedIn && e.key == 'Enter') {
+        if (!store.signedIn && e.key == 'Enter') {
             var signinSubmitel = document.getElementById('signin-submit');
             signinSubmitel.click();
         }
     };
     document.addEventListener('keypress', signInEnter);
 
-    //sets name in store and intializes websocket connection
-
     var signinClickHandle = function signinClickHandle() {
         console.log('login attempt', handlein.value);
         var handle = handlein.value.replace(/\s+/g, '');
         console.log(_auth2.default);
         handlein.value = '';
-        _auth2.default.passwordSetup(handle, _store2.default);
+        _auth2.default.passwordSetup(handle, store);
         signinSubmit.removeEventListener('click', signinClickHandle);
     };
     signinSubmit.addEventListener('click', signinClickHandle);
-
-    document.getElementById('userlistLabel').addEventListener('click', function (e) {
-        document.querySelectorAll('.room').forEach(function (roomButton) {
-            roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
-        });
-    });
 
     guestSignIn.addEventListener('click', function () {
         (0, _API.guest)().then(function (res) {
             signinSubmit.removeEventListener('click', signinClickHandle);
             document.removeEventListener('keypress', signInEnter);
             console.log(res);
-            _auth2.default.finalize('guest', _store2.default);
+            _auth2.default.finalize('guest', store);
         });
     });
 };
@@ -210,9 +199,14 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _ui = __webpack_require__(5);
+
+var _ui2 = _interopRequireDefault(_ui);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Store = function Store() {
+    this.ui = new _ui2.default(this);
     this.handle = '';
     this.room = 'general';
     this.signedIn = false;
@@ -221,72 +215,23 @@ var Store = function Store() {
     this.userList = {};
     this.msgs = [];
     this.setRoom = this.setRoom.bind(this);
-    this.roomName = this.roomName.bind(this);
 };
 
 Store.prototype.setHandle = function (handle) {
-
-    var username = document.getElementById('username');
     this.handle = handle;
-    username.innerHTML = '<h1>' + this.handle + '</h1>';
-};
-Store.prototype.roomName = function () {
-    return this.room;
+    this.ui.makeName(handle);
 };
 Store.prototype.setRoom = function (room) {
-    var roomname = document.getElementById('roomname');
     this.room = room;
-    document.getElementById('roomname').innerHTML = '<h1>' + this.roomName() + '</h1>';
+    this.ui.makeRoom(room);
 };
-
 Store.prototype.changeUserlist = function (rooms, userList) {
     this.userList = userList;
     this.rooms = rooms;
-    var userListEl = document.getElementById('userList');
-    userListEl.innerHTML = '';
-
-    var roomChangeInput = document.getElementById('roomChangeInput');
-    var roomChangeButton = document.getElementById('roomChangeButton');
-
-    Object.keys(this.rooms).forEach(function (room, i) {
-
-        var roomEl = document.createElement('li');
-        roomEl.innerHTML = '<div><button id=roomButton data-room=' + room + '>' + room + '</button><button data-room=' + room + ' id=\'collapseRoom\'>[x]</button</div>';
-        roomEl.classList.add('room');
-        roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
-            roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
-        });
-        var roomElList = document.createElement('ul');
-        roomElList.classList.add('roomUserList');
-
-        roomEl.appendChild(roomElList);
-        userListEl.appendChild(roomEl);
-
-        rooms[room].forEach(function (user) {
-            console.log('userlist', typeof user === 'undefined' ? 'undefined' : _typeof(user), user);
-            var li = document.createElement('li');
-            li.innerHTML = '<button id=\'userButton\' data-name=' + user.name + '\'>' + user.name + '</button>';
-            roomElList.appendChild(li);
-        });
-
-        document.querySelectorAll('#roomButton').forEach(function (button) {
-            button.addEventListener('click', function (e) {
-                console.log(button.dataset.room);
-                roomChangeInput.value = button.dataset.room;
-                roomChangeButton.click();
-            });
-        });
-
-        document.querySelectorAll('#userButton').forEach(function (button) {
-            button.addEventListener('click', function (e) {
-                console.log(button.dataset.name);
-            });
-        });
-    });
+    this.ui.makeUserList(rooms);
 };
 
-var store = new Store();
-exports.default = store;
+exports.default = Store;
 
 /***/ }),
 /* 3 */
@@ -525,6 +470,101 @@ function bottomizeScroll() {
 }
 
 exports.default = WSmaker;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var UI = function () {
+    function UI(store) {
+        _classCallCheck(this, UI);
+
+        this.store = store;
+
+        //makes room list collapseable on each room
+        document.getElementById('userlistLabel').addEventListener('click', function (e) {
+            document.querySelectorAll('.room').forEach(function (roomButton) {
+                roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
+            });
+        });
+    }
+
+    _createClass(UI, [{
+        key: 'makeName',
+        value: function makeName(handle) {
+            var username = document.getElementById('username');
+            username.innerHTML = '<h1>' + handle + '</h1>';
+        }
+    }, {
+        key: 'makeRoom',
+        value: function makeRoom(roomName) {
+            var roomname = document.getElementById('roomname');
+            document.getElementById('roomname').innerHTML = '<h1>' + roomName + '</h1>';
+        }
+    }, {
+        key: 'makeUserList',
+        value: function makeUserList(rooms) {
+            var userListEl = document.getElementById('userList');
+            userListEl.innerHTML = '';
+
+            var roomChangeInput = document.getElementById('roomChangeInput');
+            var roomChangeButton = document.getElementById('roomChangeButton');
+
+            Object.keys(rooms).forEach(function (room, i) {
+
+                var roomEl = document.createElement('li');
+                roomEl.innerHTML = '<div><button id=roomButton data-room=' + room + '>' + room + '</button><button data-room=' + room + ' id=\'collapseRoom\'>[x]</button</div>';
+                roomEl.classList.add('room');
+                roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
+                    roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
+                });
+                var roomElList = document.createElement('ul');
+                roomElList.classList.add('roomUserList');
+
+                roomEl.appendChild(roomElList);
+                userListEl.appendChild(roomEl);
+
+                rooms[room].forEach(function (user) {
+                    console.log('userlist', typeof user === 'undefined' ? 'undefined' : _typeof(user), user);
+                    var li = document.createElement('li');
+                    li.innerHTML = '<button id=\'userButton\' data-name=' + user.name + '\'>' + user.name + '</button>';
+                    roomElList.appendChild(li);
+                });
+
+                document.querySelectorAll('#roomButton').forEach(function (button) {
+                    button.addEventListener('click', function (e) {
+                        console.log(button.dataset.room);
+                        roomChangeInput.value = button.dataset.room;
+                        roomChangeButton.click();
+                    });
+                });
+
+                document.querySelectorAll('#userButton').forEach(function (button) {
+                    button.addEventListener('click', function (e) {
+                        console.log(button.dataset.name);
+                    });
+                });
+            });
+        }
+    }]);
+
+    return UI;
+}();
+
+exports.default = UI;
 
 /***/ })
 /******/ ]);
