@@ -145,6 +145,8 @@ var _API = __webpack_require__(0);
 
 var _auth = __webpack_require__(3);
 
+var _auth2 = _interopRequireDefault(_auth);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var startup = function startup() {
@@ -154,14 +156,13 @@ var startup = function startup() {
     handlein.focus();
     var appholder = document.getElementById('appholder');
     var signin = document.getElementById('signin');
-    var signedIn = false;
     var guestSignIn = document.getElementById('signin-guest');
 
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
 
     var signInEnter = function signInEnter(e) {
-        if (e.key == 'Enter') {
+        if (!_store2.default.signedIn && e.key == 'Enter') {
             var signinSubmitel = document.getElementById('signin-submit');
             signinSubmitel.click();
         }
@@ -171,12 +172,11 @@ var startup = function startup() {
     //sets name in store and intializes websocket connection
 
     var signinClickHandle = function signinClickHandle() {
-        document.removeEventListener('keypress', signInEnter);
         console.log('login attempt', handlein.value);
         var handle = handlein.value.replace(/\s+/g, '');
-        console.log(_auth.authSeq);
+        console.log(_auth2.default);
         handlein.value = '';
-        (0, _auth.authSeq)(handle, _store2.default);
+        _auth2.default.passwordSetup(handle, _store2.default);
         signinSubmit.removeEventListener('click', signinClickHandle);
     };
     signinSubmit.addEventListener('click', signinClickHandle);
@@ -192,10 +192,7 @@ var startup = function startup() {
             signinSubmit.removeEventListener('click', signinClickHandle);
             document.removeEventListener('keypress', signInEnter);
             console.log(res);
-            _store2.default.setHandle('guest');
-            (0, _WS2.default)(_store2.default);
-            appholder.classList.remove('blur');
-            signin.style.display = 'none';
+            _auth2.default.finalize('guest', _store2.default);
         });
     });
 };
@@ -218,6 +215,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var Store = function Store() {
     this.handle = '';
     this.room = 'general';
+    this.signedIn = false;
     this.store = {};
     this.rooms = {};
     this.userList = {};
@@ -300,7 +298,6 @@ exports.default = store;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.authSeq = undefined;
 
 var _WS = __webpack_require__(4);
 
@@ -312,67 +309,91 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var diffUserButton = document.createElement('input');
 
-var authSeq = exports.authSeq = function authSeq(handle, store) {
+var authSeq = function authSeq() {
+    this.passwordSetup = this.passwordSetup.bind(this);
+    this.changeToLogin = this.changeToLogin.bind(this);
+    this.changeToSignUp = this.changeToSignUp.bind(this);
+};
+authSeq.prototype.passwordSetup = function (handle, store) {
+    var _this = this;
+
     (0, _API.isUser)({ "username": handle }).then(function (res) {
+        console.log("THISTHITSTHTITHIS", _this);
         var signinButtons = document.getElementById('signin-buttons');
         var anotherUserButton = document.createElement('INPUT');
         anotherUserButton.type = 'submit';
         anotherUserButton.value = 'Another User';
         anotherUserButton.id = 'anotherUserButton';
-        anotherUserButton.addEventListener('click', signInInitialHandleMaker(store));
+        anotherUserButton.addEventListener('click', _this.signInInitialHandleMaker(store));
 
         var a = signinButtons.appendChild(anotherUserButton);
         console.log(signinButtons, anotherUserButton, a.parentElement);
         console.log('registered:', res.isuser);
         if (res.isuser) {
-            changeToLogin(handle, store);
-            // inform that they will be signing up
-            //get password, signup
+            _this.changeToLogin(handle, store);
         } else {
-
-            changeToSignUp(handle, store);
-            //inform that they will be loggin in
-            //get password, try to login
+            _this.changeToSignUp(handle, store);
         }
     });
 };
 
-var finalize = function finalize(handle, store) {
-    // signedIn = true;
+authSeq.prototype.finalize = function (handle, store) {
     store.setHandle(handle.length > 1 ? handle : 'anon');
-
+    store.signedIn = true;
     (0, _WS2.default)(store);
     appholder.classList.remove('blur');
     signin.style.display = 'none';
+    var signinSubmit = document.getElementById('signin-submit');
+    signinSubmit.parentElement.removeChild(signinSubmit);
 };
-var changeToSignUp = function changeToSignUp(handle) {
+authSeq.prototype.changeToSignUp = function (handle, store) {
+    var _this2 = this;
+
     var input = document.getElementById('handle-Signin');
     input.placeholder = 'enter Password';
+
     var signin = document.getElementById('signin');
     var text = signin.querySelector('h1');
     text.innerText = '-' + handle + '- not registered, enter a password to create an account or press guest';
+
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', function () {
         console.log("signing", input.value);
+        (0, _API.signup)({ username: handle, password: input.value }).then(function (res) {
+            console.log(res);
+            _this2.finalize(handle, store);
+        });
     });
 };
-var changeToLogin = function changeToLogin(handle) {
+authSeq.prototype.changeToLogin = function (handle, store) {
+    var _this3 = this;
+
+    console.log("EHERHEHERHRHERHRHEH", this);
     var input = document.getElementById('handle-Signin');
     input.placeholder = 'enter Password';
+
     var signin = document.getElementById('signin');
     var text = signin.querySelector('h1');
     text.innerText = 'welcome back, -' + handle + '- , please enter password';
+
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', function () {
         console.log("login", input.value);
+        (0, _API.login)({ username: handle, password: input.value }).then(function (res) {
+            console.log(res);
+            _this3.finalize(handle, store);
+        });
     });
 };
-var signInInitialHandleMaker = function signInInitialHandleMaker(store) {
+authSeq.prototype.signInInitialHandleMaker = function (store) {
     return function () {
         var anotherUserButton = document.getElementById('anotherUserButton');
         anotherUserButton.parentElement.removeChild(anotherUserButton);
 
         var signinSubmit = document.getElementById('signin-submit');
+        var clone = signinSubmit.cloneNode();
+        signinSubmit.parentElement.replaceChild(clone, signinSubmit);
+        signinSubmit = clone;
         var handlein = document.getElementById('handle-Signin');
         handlein.focus();
         var appholder = document.getElementById('appholder');
@@ -384,26 +405,19 @@ var signInInitialHandleMaker = function signInInitialHandleMaker(store) {
         var text = signin.querySelector('h1');
         text.innerText = 'Welcome To Chat, please enter a name or press guest';
 
-        var signInEnter = function signInEnter(e) {
-            if (e.key == 'Enter') {
-                var signinSubmitel = document.getElementById('signin-submit');
-                signinSubmitel.click();
-            }
-        };
-        document.addEventListener('keypress', signInEnter);
-
         var signinClickHandle = function signinClickHandle() {
-            document.removeEventListener('keypress', signInEnter);
             console.log('login attempt', handlein.value);
             var handle = handlein.value.replace(/\s+/g, '');
-            console.log(authSeq);
+            console.log(authseq);
             handlein.value = '';
-            authSeq(handle, store);
+            authseq.passwordSetup(handle, store);
             signinSubmit.removeEventListener('click', signinClickHandle);
         };
         signinSubmit.addEventListener('click', signinClickHandle);
     };
 };
+var authseq = new authSeq();
+exports.default = authseq;
 
 /***/ }),
 /* 4 */

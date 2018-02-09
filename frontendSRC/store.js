@@ -3,6 +3,7 @@
 const Store = function(){
     this.handle = ''
     this.room = 'general'
+    this.signedIn = false;
     this.store = {};
     this.rooms = {};
     this.userList={}

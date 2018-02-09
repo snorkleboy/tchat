@@ -1,7 +1,7 @@
 import store from './store';
 import WSmaker from './WS';
 import {login,signup,isUser,guest} from './API'
-import {authSeq} from './auth';
+import authSeq from './auth';
 
 
 const startup = () => {
@@ -11,14 +11,13 @@ const startup = () => {
     handlein.focus();
     const appholder = document.getElementById('appholder');
     const signin = document.getElementById('signin');
-    let signedIn = false;
     const guestSignIn = document.getElementById('signin-guest')
 
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
     
     const signInEnter = function (e){
-        if (e.key == 'Enter') {
+        if (!store.signedIn && e.key == 'Enter') {
             const signinSubmitel = document.getElementById('signin-submit');
             signinSubmitel.click();
             
@@ -29,12 +28,11 @@ const startup = () => {
     //sets name in store and intializes websocket connection
     
     const signinClickHandle = () => {
-        document.removeEventListener('keypress', signInEnter);
         console.log('login attempt',handlein.value);
         let handle = handlein.value.replace(/\s+/g, '');
         console.log(authSeq);
         handlein.value = ''
-        authSeq(handle,store);
+        authSeq.passwordSetup(handle,store);
         signinSubmit.removeEventListener('click', signinClickHandle);
     };
     signinSubmit.addEventListener('click', signinClickHandle)
@@ -50,10 +48,7 @@ const startup = () => {
             signinSubmit.removeEventListener('click', signinClickHandle);
             document.removeEventListener('keypress', signInEnter);
             console.log(res)
-            store.setHandle('guest');
-            WSmaker(store);
-            appholder.classList.remove('blur');
-            signin.style.display = 'none';
+            authSeq.finalize('guest',store);
         });
 
     })
