@@ -30,14 +30,14 @@ authSeq.prototype.passwordSetup = function(handle,store){
 
 }
 
-authSeq.prototype.finalize = function(handle,store){
+authSeq.prototype.finalize = function(handle,store,token){
     store.setHandle(handle.length > 1 ? handle : 'anon');
     store.signedIn = true;
     appholder.classList.remove('blur');
     signin.style.display = 'none';
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
-    WSmaker(store);
+    WSmaker(store,token);
 }
 
 authSeq.prototype.changeToSignUp = function(handle,store){
@@ -51,10 +51,16 @@ authSeq.prototype.changeToSignUp = function(handle,store){
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click',()=>{
         console.log("signing", input.value)
-        signup({ username: handle, password: input.value }).then((res)=>{
-            console.log(res)
-            this.finalize(handle,store);
-        });
+        signup({ username: handle, password: input.value })
+        .then(
+            (res)=>{
+                console.log(res)
+                this.finalize(handle,store,res);
+            },
+            (fail)=>{
+                console.log('failure:',fail);
+                text.innerText = fail;
+            });
     });
 
 }
@@ -70,10 +76,17 @@ authSeq.prototype.changeToLogin = function(handle,store){
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', () => {
         console.log("login", input.value)
-        login({ username: handle, password: input.value }).then((res)=>{
-            console.log(res);
-            this.finalize(handle,store);
-        });
+        console.log(login({ username: handle, password: input.value }));
+        login({ username: handle, password: input.value })
+        .then(
+            (res)=>{
+                console.log(res);
+                this.finalize(handle,store,res);
+            },
+            (fail)=>{
+                console.log(fail);
+                text.innerText = fail;
+            });
     });
 }
 

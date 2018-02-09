@@ -39,34 +39,51 @@ class UI{
 
         Object.keys(rooms).forEach((room, i) => {
 
-
+            //this is a li for a single room. It will have a collapse button and a list of users.  
             const roomEl = document.createElement('li');
-            roomEl.innerHTML = `<div><button id=roomButton data-room=${room}>${room}</button><button data-room=${room} id='collapseRoom'>[x]</button</div>`
+            roomEl.innerHTML = `
+            <div>
+                <button 
+                id=roomButton 
+                data-room=${room}>
+                    ${room}
+                </button>
+                <button
+                data-room=${room} 
+                id='collapseRoom'>
+                    [x]
+                </button>
+            </div>
+            `
             roomEl.classList.add('room')
+            //adds a collapse event to the roomels second button which collapses its user list
             roomEl.querySelector('#collapseRoom').addEventListener('click', (e) => {
                 roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
             })
+
+            //this is the list of users the roomEl will have
             const roomElList = document.createElement('ul');
             roomElList.classList.add('roomUserList')
 
             roomEl.appendChild(roomElList);
             userListEl.appendChild(roomEl)
 
+            //go through every user in this room and make a new li for them and append to the roomellist
             rooms[room].forEach((user) => {
-                console.log('userlist', typeof (user), user);
                 const li = document.createElement('li');
                 li.innerHTML = `<button id='userButton' data-name=${user.name}'>${user.name}</button>`
                 roomElList.appendChild(li);
             })
 
+            //clicking on a roomname will make change the room by putting that roomname into the roomname change input element and clicking its submit button
             document.querySelectorAll('#roomButton').forEach((button) => {
                 button.addEventListener('click', (e) => {
-                    console.log(button.dataset.room)
                     roomChangeInput.value = button.dataset.room
                     roomChangeButton.click();
                 })
             })
-
+            //this is for clicking a username
+            //will later impliment direct messenging and freinds. 
             document.querySelectorAll('#userButton').forEach((button) => {
                 button.addEventListener('click', (e) => {
                     console.log(button.dataset.name)

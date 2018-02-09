@@ -84,7 +84,13 @@ var login = exports.login = function login(payload) {
         method: "POST",
         body: JSON.stringify(payload)
     }).then(function (res) {
-        return res.json();
+        return res.json().then(function (data) {
+            if (res.ok) {
+                return data;
+            } else {
+                throw new Error(data.error);
+            }
+        });
     });
 };
 
@@ -93,15 +99,13 @@ var signup = exports.signup = function signup(payload) {
         method: "POST",
         body: JSON.stringify(payload)
     }).then(function (res) {
-        return res.json();
-    });
-};
-var isUser = exports.isUser = function isUser(payload) {
-    return fetch("http://localhost:3000/api/isuser", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    }).then(function (res) {
-        return res.json();
+        return res.json().then(function (data) {
+            if (res.ok) {
+                return data;
+            } else {
+                throw new Error(data.error);
+            }
+        });
     });
 };
 
@@ -109,6 +113,20 @@ var guest = exports.guest = function guest() {
     return fetch("http://localhost:3000/api/login", {
         method: "POST",
         body: JSON.stringify({ 'username': 'guest', 'password': 'password' })
+    }).then(function (res) {
+        return res.json().then(function (data) {
+            if (res.ok) {
+                return data;
+            } else {
+                throw new Error(data.error);
+            }
+        });
+    });
+};
+var isUser = exports.isUser = function isUser(payload) {
+    return fetch("http://localhost:3000/api/isuser", {
+        method: "POST",
+        body: JSON.stringify(payload)
     }).then(function (res) {
         return res.json();
     });
@@ -172,7 +190,7 @@ var startup = function startup() {
         (0, _API.guest)().then(function (res) {
             signinSubmit.removeEventListener('click', signinClickHandle);
             console.log(res);
-            _auth2.default.finalize('guest', store);
+            _auth2.default.finalize('guest', store, res);
         });
     });
 };
@@ -281,14 +299,14 @@ authSeq.prototype.passwordSetup = function (handle, store) {
     });
 };
 
-authSeq.prototype.finalize = function (handle, store) {
+authSeq.prototype.finalize = function (handle, store, token) {
     store.setHandle(handle.length > 1 ? handle : 'anon');
     store.signedIn = true;
     appholder.classList.remove('blur');
     signin.style.display = 'none';
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
-    (0, _WS2.default)(store);
+    (0, _WS2.default)(store, token);
 };
 
 authSeq.prototype.changeToSignUp = function (handle, store) {
@@ -306,7 +324,10 @@ authSeq.prototype.changeToSignUp = function (handle, store) {
         console.log("signing", input.value);
         (0, _API.signup)({ username: handle, password: input.value }).then(function (res) {
             console.log(res);
-            _this2.finalize(handle, store);
+            _this2.finalize(handle, store, res);
+        }, function (fail) {
+            console.log('failure:', fail);
+            text.innerText = fail;
         });
     });
 };
@@ -324,9 +345,13 @@ authSeq.prototype.changeToLogin = function (handle, store) {
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', function () {
         console.log("login", input.value);
+        console.log((0, _API.login)({ username: handle, password: input.value }));
         (0, _API.login)({ username: handle, password: input.value }).then(function (res) {
             console.log(res);
-            _this3.finalize(handle, store);
+            _this3.finalize(handle, store, res);
+        }, function (fail) {
+            console.log(fail);
+            text.innerText = fail;
         });
     });
 };
@@ -483,8 +508,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -537,33 +560,38 @@ var UI = function () {
 
             Object.keys(rooms).forEach(function (room, i) {
 
+                //this is a li for a single room. It will have a collapse button and a list of users.  
                 var roomEl = document.createElement('li');
-                roomEl.innerHTML = '<div><button id=roomButton data-room=' + room + '>' + room + '</button><button data-room=' + room + ' id=\'collapseRoom\'>[x]</button</div>';
+                roomEl.innerHTML = '\n            <div>\n                <button \n                id=roomButton \n                data-room=' + room + '>\n                    ' + room + '\n                </button>\n                <button\n                data-room=' + room + ' \n                id=\'collapseRoom\'>\n                    [x]\n                </button>\n            </div>\n            ';
                 roomEl.classList.add('room');
+                //adds a collapse event to the roomels second button which collapses its user list
                 roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
                     roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
                 });
+
+                //this is the list of users the roomEl will have
                 var roomElList = document.createElement('ul');
                 roomElList.classList.add('roomUserList');
 
                 roomEl.appendChild(roomElList);
                 userListEl.appendChild(roomEl);
 
+                //go through every user in this room and make a new li for them and append to the roomellist
                 rooms[room].forEach(function (user) {
-                    console.log('userlist', typeof user === 'undefined' ? 'undefined' : _typeof(user), user);
                     var li = document.createElement('li');
                     li.innerHTML = '<button id=\'userButton\' data-name=' + user.name + '\'>' + user.name + '</button>';
                     roomElList.appendChild(li);
                 });
 
+                //clicking on a roomname will make change the room by putting that roomname into the roomname change input element and clicking its submit button
                 document.querySelectorAll('#roomButton').forEach(function (button) {
                     button.addEventListener('click', function (e) {
-                        console.log(button.dataset.room);
                         roomChangeInput.value = button.dataset.room;
                         roomChangeButton.click();
                     });
                 });
-
+                //this is for clicking a username
+                //will later impliment direct messenging and freinds. 
                 document.querySelectorAll('#userButton').forEach(function (button) {
                     button.addEventListener('click', function (e) {
                         console.log(button.dataset.name);

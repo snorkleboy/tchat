@@ -29,7 +29,7 @@ const startup = () => {
         guest().then((res)=>{
             signinSubmit.removeEventListener('click', signinClickHandle);
             console.log(res)
-            authSeq.finalize('guest',store);
+            authSeq.finalize('guest',store,res);
         });
 
     })
