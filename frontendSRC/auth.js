@@ -11,7 +11,6 @@ const authSeq = function(){
 }
 authSeq.prototype.passwordSetup = function(handle,store){
     isUser({"username":handle}).then((res) => {
-        console.log("THISTHITSTHTITHIS", this);
         const signinButtons = document.getElementById('signin-buttons');
         const anotherUserButton = document.createElement('INPUT');
         anotherUserButton.type='submit';
@@ -40,6 +39,7 @@ authSeq.prototype.finalize = function(handle,store){
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
 }
+
 authSeq.prototype.changeToSignUp = function(handle,store){
     const input = document.getElementById('handle-Signin');
     input.placeholder= 'enter Password';
@@ -58,8 +58,8 @@ authSeq.prototype.changeToSignUp = function(handle,store){
     });
 
 }
+
 authSeq.prototype.changeToLogin = function(handle,store){
-    console.log("EHERHEHERHRHERHRHEH",this)
     const input = document.getElementById('handle-Signin');
     input.placeholder = 'enter Password';
 
@@ -75,8 +75,8 @@ authSeq.prototype.changeToLogin = function(handle,store){
             this.finalize(handle,store);
         });
     });
-
 }
+
 authSeq.prototype.signInInitialHandleMaker = function(store){
     return ()=>{
         const anotherUserButton = document.getElementById('anotherUserButton');
@@ -97,9 +97,6 @@ authSeq.prototype.signInInitialHandleMaker = function(store){
         const text = signin.querySelector('h1')
         text.innerText = `Welcome To Chat, please enter a name or press guest`
 
-
-
-
         const signinClickHandle = () => {
             console.log('login attempt', handlein.value);
             let handle = handlein.value.replace(/\s+/g, '');
@@ -107,9 +104,6 @@ authSeq.prototype.signInInitialHandleMaker = function(store){
             handlein.value = ''
             authseq.passwordSetup(handle, store);
             signinSubmit.removeEventListener('click', signinClickHandle);
-
-
-
         };
         signinSubmit.addEventListener('click', signinClickHandle)
     }

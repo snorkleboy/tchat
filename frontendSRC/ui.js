@@ -8,6 +8,16 @@ class UI{
                 roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
             })
         })
+
+
+        //binds enter to signinbutton at start
+        const signInEnter = function (e) {
+            if (!store.signedIn && e.key == 'Enter') {
+                const signinSubmitel = document.getElementById('signin-submit');
+                signinSubmitel.click();
+            }
+        }
+        document.addEventListener('keypress', signInEnter);
     }
 
     makeName(handle){

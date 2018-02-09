@@ -12,17 +12,6 @@ const startup = () => {
     const appholder = document.getElementById('appholder');
     const signin = document.getElementById('signin');
     const guestSignIn = document.getElementById('signin-guest')
-
-
-    const signInEnter = function (e){
-        if (!store.signedIn && e.key == 'Enter') {
-            const signinSubmitel = document.getElementById('signin-submit');
-            signinSubmitel.click();
-            
-        }
-    }
-    document.addEventListener('keypress', signInEnter);
-
     
     const signinClickHandle = () => {
         console.log('login attempt',handlein.value);

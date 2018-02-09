@@ -158,14 +158,6 @@ var startup = function startup() {
     var signin = document.getElementById('signin');
     var guestSignIn = document.getElementById('signin-guest');
 
-    var signInEnter = function signInEnter(e) {
-        if (!store.signedIn && e.key == 'Enter') {
-            var signinSubmitel = document.getElementById('signin-submit');
-            signinSubmitel.click();
-        }
-    };
-    document.addEventListener('keypress', signInEnter);
-
     var signinClickHandle = function signinClickHandle() {
         console.log('login attempt', handlein.value);
         var handle = handlein.value.replace(/\s+/g, '');
@@ -263,7 +255,6 @@ authSeq.prototype.passwordSetup = function (handle, store) {
     var _this = this;
 
     (0, _API.isUser)({ "username": handle }).then(function (res) {
-        console.log("THISTHITSTHTITHIS", _this);
         var signinButtons = document.getElementById('signin-buttons');
         var anotherUserButton = document.createElement('INPUT');
         anotherUserButton.type = 'submit';
@@ -291,6 +282,7 @@ authSeq.prototype.finalize = function (handle, store) {
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
 };
+
 authSeq.prototype.changeToSignUp = function (handle, store) {
     var _this2 = this;
 
@@ -310,10 +302,10 @@ authSeq.prototype.changeToSignUp = function (handle, store) {
         });
     });
 };
+
 authSeq.prototype.changeToLogin = function (handle, store) {
     var _this3 = this;
 
-    console.log("EHERHEHERHRHERHRHEH", this);
     var input = document.getElementById('handle-Signin');
     input.placeholder = 'enter Password';
 
@@ -330,6 +322,7 @@ authSeq.prototype.changeToLogin = function (handle, store) {
         });
     });
 };
+
 authSeq.prototype.signInInitialHandleMaker = function (store) {
     return function () {
         var anotherUserButton = document.getElementById('anotherUserButton');
@@ -500,6 +493,15 @@ var UI = function () {
                 roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
             });
         });
+
+        //binds enter to signinbutton at start
+        var signInEnter = function signInEnter(e) {
+            if (!store.signedIn && e.key == 'Enter') {
+                var signinSubmitel = document.getElementById('signin-submit');
+                signinSubmitel.click();
+            }
+        };
+        document.addEventListener('keypress', signInEnter);
     }
 
     _createClass(UI, [{
