@@ -36,7 +36,7 @@ const startup = () => {
             (error) => {
                 const text = document.getElementById('signin').querySelector('h1')
                 console.log(error);
-                text.innerText = `${error.error}`;
+                text.innerText = `${error}`;
             });
     })
 };

@@ -15,8 +15,8 @@ body{
     margin: 0 auto;
     top: 50%;
     left: 50%;
-    width: 100vw;
-    height: 100vh;
+    /* width: 100vw; */
+    /* height: 100vh; */
     text-align: center
 }
 .signin-prompt{
