@@ -105,6 +105,15 @@ var isUser = exports.isUser = function isUser(payload) {
     });
 };
 
+var guest = exports.guest = function guest() {
+    return fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        body: JSON.stringify({ 'username': 'guest', 'password': 'password' })
+    }).then(function (res) {
+        return res.json();
+    });
+};
+
 var auth = function auth() {
     return fetch("http://localhost:3000/api/login", {
         method: "POST",
@@ -128,13 +137,16 @@ var _store = __webpack_require__(2);
 
 var _store2 = _interopRequireDefault(_store);
 
+var _WS = __webpack_require__(4);
+
+var _WS2 = _interopRequireDefault(_WS);
+
 var _API = __webpack_require__(0);
 
 var _auth = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import WSmaker from './WS';
 var startup = function startup() {
 
     var signinSubmit = document.getElementById('signin-submit');
@@ -143,6 +155,7 @@ var startup = function startup() {
     var appholder = document.getElementById('appholder');
     var signin = document.getElementById('signin');
     var signedIn = false;
+    var guestSignIn = document.getElementById('signin-guest');
 
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
@@ -173,6 +186,18 @@ var startup = function startup() {
             roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
         });
     });
+
+    guestSignIn.addEventListener('click', function () {
+        (0, _API.guest)().then(function (res) {
+            signinSubmit.removeEventListener('click', signinClickHandle);
+            document.removeEventListener('keypress', signInEnter);
+            console.log(res);
+            _store2.default.setHandle('guest');
+            (0, _WS2.default)(_store2.default);
+            appholder.classList.remove('blur');
+            signin.style.display = 'none';
+        });
+    });
 };
 
 document.addEventListener('DOMContentLoaded', startup);
@@ -190,8 +215,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var username = document.getElementById('username');
-var roomname = document.getElementById('roomname');
 var Store = function Store() {
     this.handle = '';
     this.room = 'general';
@@ -204,6 +227,8 @@ var Store = function Store() {
 };
 
 Store.prototype.setHandle = function (handle) {
+
+    var username = document.getElementById('username');
     this.handle = handle;
     username.innerHTML = '<h1>' + this.handle + '</h1>';
 };
@@ -211,6 +236,7 @@ Store.prototype.roomName = function () {
     return this.room;
 };
 Store.prototype.setRoom = function (room) {
+    var roomname = document.getElementById('roomname');
     this.room = room;
     document.getElementById('roomname').innerHTML = '<h1>' + this.roomName() + '</h1>';
 };

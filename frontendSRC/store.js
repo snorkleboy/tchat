@@ -1,6 +1,5 @@
 
-const username = document.getElementById('username');
-const roomname = document.getElementById('roomname')
+
 const Store = function(){
     this.handle = ''
     this.room = 'general'
@@ -14,6 +13,8 @@ const Store = function(){
 
 
 Store.prototype.setHandle = function(handle){
+
+    const username = document.getElementById('username');
     this.handle = handle
     username.innerHTML = `<h1>${this.handle}</h1>`
 }
@@ -21,6 +22,7 @@ Store.prototype.roomName = function(){
     return this.room
 }
 Store.prototype.setRoom = function(room){
+    const roomname = document.getElementById('roomname')
     this.room = room;
     document.getElementById('roomname').innerHTML = `<h1>${this.roomName()}</h1>`
 }

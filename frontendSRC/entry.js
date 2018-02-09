@@ -1,6 +1,6 @@
 import store from './store';
-// import WSmaker from './WS';
-import {login,signup,isUser} from './API'
+import WSmaker from './WS';
+import {login,signup,isUser,guest} from './API'
 import {authSeq} from './auth';
 
 
@@ -12,6 +12,7 @@ const startup = () => {
     const appholder = document.getElementById('appholder');
     const signin = document.getElementById('signin');
     let signedIn = false;
+    const guestSignIn = document.getElementById('signin-guest')
 
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
@@ -35,9 +36,6 @@ const startup = () => {
         handlein.value = ''
         authSeq(handle,store);
         signinSubmit.removeEventListener('click', signinClickHandle);
-        
-
-        
     };
     signinSubmit.addEventListener('click', signinClickHandle)
 
@@ -47,6 +45,18 @@ const startup = () => {
         })  
     })
 
+    guestSignIn.addEventListener('click',()=>{
+        guest().then((res)=>{
+            signinSubmit.removeEventListener('click', signinClickHandle);
+            document.removeEventListener('keypress', signInEnter);
+            console.log(res)
+            store.setHandle('guest');
+            WSmaker(store);
+            appholder.classList.remove('blur');
+            signin.style.display = 'none';
+        });
+
+    })
 };
 
 document.addEventListener('DOMContentLoaded', startup);

@@ -24,6 +24,12 @@ export const isUser = (payload) => fetch("http://localhost:3000/api/isuser",
     })
     .then(function (res) { return res.json(); })
 
+export const guest = () => fetch("http://localhost:3000/api/login",
+    {
+        method: "POST",
+        body: JSON.stringify({'username':'guest','password':'password'}),
+    })
+    .then((res) => res.json())
 
 const auth = ()=> fetch("http://localhost:3000/api/login",
     {
