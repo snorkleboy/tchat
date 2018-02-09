@@ -81,6 +81,26 @@ module Chat
                     end
 
                 end,
+                '/isuser' =>lambda do |env|
+                    request = Rack::Request.new(env) 
+
+                    begin
+                        params = JSON.parse(request.body.read)
+                        p ['api controller, user check',params]
+                        #set uri
+                        uri = URI.parse("http://localhost:6000/isuser")
+                        res = Net::HTTP.post_form(uri, params)
+                        if res.is_a?(Net::HTTPSuccess)
+                                [200, { 'Content-Type' => 'application/json' }, [res.body]]
+                        else
+                                [400, { 'Content-Type' => 'application/json' },[res.body]]
+                        end
+                        
+                    rescue => exception
+                        [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>exception})]]
+                    end
+
+                end,
             )
         end
 

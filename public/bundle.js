@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -70,17 +70,72 @@
 "use strict";
 
 
-var _store = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+// var payloadd = {
+//     username: 'timlkjkh',
+//     password: 'passsssssss'
+// };
+
+var login = exports.login = function login(payload) {
+    return fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    }).then(function (res) {
+        return res.json();
+    });
+};
+
+var signup = exports.signup = function signup(payload) {
+    return fetch("http://localhost:3000/api/signup", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    }).then(function (res) {
+        return res.json();
+    });
+};
+var isUser = exports.isUser = function isUser(payload) {
+    return fetch("http://localhost:3000/api/isuser", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    }).then(function (res) {
+        return res.json();
+    });
+};
+
+var auth = function auth() {
+    return fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        body: JSON.stringify(payload)
+        //auth headers  //  // headers: new Headers({ 'authentication': 'jwt start' })
+    }).then(function (res) {
+        return res.json();
+    }).then(function (data) {
+        console.log(JSON.stringify(data));
+    });
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _store = __webpack_require__(2);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _WS = __webpack_require__(2);
+var _API = __webpack_require__(0);
 
-var _WS2 = _interopRequireDefault(_WS);
+var _auth = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-document.addEventListener('DOMContentLoaded', function () {
+// import WSmaker from './WS';
+var startup = function startup() {
 
     var signinSubmit = document.getElementById('signin-submit');
     var handlein = document.getElementById('handle-Signin');
@@ -88,40 +143,42 @@ document.addEventListener('DOMContentLoaded', function () {
     var appholder = document.getElementById('appholder');
     var signin = document.getElementById('signin');
     var signedIn = false;
-    var username = document.getElementById('username');
-    var roomname = document.getElementById('roomname');
+
     //one time event
     //binds enter to signin button then unbinds it (it gets rebound to submit messages)
+
     var signInEnter = function signInEnter(e) {
-        if (e.key == 'Enter' && !signedIn) {
+        if (e.key == 'Enter') {
             var signinSubmitel = document.getElementById('signin-submit');
             signinSubmitel.click();
-            document.removeEventListener('keypress', signInEnter);
         }
     };
     document.addEventListener('keypress', signInEnter);
 
     //sets name in store and intializes websocket connection
-    signinSubmit.addEventListener('click', function () {
-        signedIn = true;
-        console.log(handlein.value);
+
+    var signinClickHandle = function signinClickHandle() {
+        document.removeEventListener('keypress', signInEnter);
+        console.log('login attempt', handlein.value);
         var handle = handlein.value.replace(/\s+/g, '');
-        _store2.default.handle = handle.length > 1 ? handle : 'anon';
-        username.innerHTML = '<h1>' + _store2.default.handle + '</h1>';
-        roomname.innerHTML = '<h1>' + _store2.default.roomName() + '</h1>';
-        (0, _WS2.default)(_store2.default);
-        appholder.classList.remove('blur');
-        signin.style.display = 'none';
-    });
+        console.log(_auth.authSeq);
+        handlein.value = '';
+        (0, _auth.authSeq)(handle, _store2.default);
+        signinSubmit.removeEventListener('click', signinClickHandle);
+    };
+    signinSubmit.addEventListener('click', signinClickHandle);
+
     document.getElementById('userlistLabel').addEventListener('click', function (e) {
         document.querySelectorAll('.room').forEach(function (roomButton) {
             roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
         });
     });
-});
+};
+
+document.addEventListener('DOMContentLoaded', startup);
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -133,6 +190,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var username = document.getElementById('username');
+var roomname = document.getElementById('roomname');
 var Store = function Store() {
     this.handle = '';
     this.room = 'general';
@@ -143,12 +202,17 @@ var Store = function Store() {
     this.setRoom = this.setRoom.bind(this);
     this.roomName = this.roomName.bind(this);
 };
+
+Store.prototype.setHandle = function (handle) {
+    this.handle = handle;
+    username.innerHTML = '<h1>' + this.handle + '</h1>';
+};
 Store.prototype.roomName = function () {
     return this.room;
 };
 Store.prototype.setRoom = function (room) {
     this.room = room;
-    document.getElementById('roomname').innerHTML = '<h1>' + store.roomName() + '</h1>';
+    document.getElementById('roomname').innerHTML = '<h1>' + this.roomName() + '</h1>';
 };
 
 Store.prototype.changeUserlist = function (rooms, userList) {
@@ -201,7 +265,122 @@ var store = new Store();
 exports.default = store;
 
 /***/ }),
-/* 2 */
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.authSeq = undefined;
+
+var _WS = __webpack_require__(4);
+
+var _WS2 = _interopRequireDefault(_WS);
+
+var _API = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var diffUserButton = document.createElement('input');
+
+var authSeq = exports.authSeq = function authSeq(handle, store) {
+    (0, _API.isUser)({ "username": handle }).then(function (res) {
+        var signinButtons = document.getElementById('signin-buttons');
+        var anotherUserButton = document.createElement('INPUT');
+        anotherUserButton.type = 'submit';
+        anotherUserButton.value = 'Another User';
+        anotherUserButton.id = 'anotherUserButton';
+        anotherUserButton.addEventListener('click', signInInitialHandleMaker(store));
+
+        var a = signinButtons.appendChild(anotherUserButton);
+        console.log(signinButtons, anotherUserButton, a.parentElement);
+        console.log('registered:', res.isuser);
+        if (res.isuser) {
+            changeToLogin(handle, store);
+            // inform that they will be signing up
+            //get password, signup
+        } else {
+
+            changeToSignUp(handle, store);
+            //inform that they will be loggin in
+            //get password, try to login
+        }
+    });
+};
+
+var finalize = function finalize(handle, store) {
+    // signedIn = true;
+    store.setHandle(handle.length > 1 ? handle : 'anon');
+
+    (0, _WS2.default)(store);
+    appholder.classList.remove('blur');
+    signin.style.display = 'none';
+};
+var changeToSignUp = function changeToSignUp(handle) {
+    var input = document.getElementById('handle-Signin');
+    input.placeholder = 'enter Password';
+    var signin = document.getElementById('signin');
+    var text = signin.querySelector('h1');
+    text.innerText = '-' + handle + '- not registered, enter a password to create an account or press guest';
+    var signinSubmit = document.getElementById('signin-submit');
+    signinSubmit.addEventListener('click', function () {
+        console.log("signing", input.value);
+    });
+};
+var changeToLogin = function changeToLogin(handle) {
+    var input = document.getElementById('handle-Signin');
+    input.placeholder = 'enter Password';
+    var signin = document.getElementById('signin');
+    var text = signin.querySelector('h1');
+    text.innerText = 'welcome back, -' + handle + '- , please enter password';
+    var signinSubmit = document.getElementById('signin-submit');
+    signinSubmit.addEventListener('click', function () {
+        console.log("login", input.value);
+    });
+};
+var signInInitialHandleMaker = function signInInitialHandleMaker(store) {
+    return function () {
+        var anotherUserButton = document.getElementById('anotherUserButton');
+        anotherUserButton.parentElement.removeChild(anotherUserButton);
+
+        var signinSubmit = document.getElementById('signin-submit');
+        var handlein = document.getElementById('handle-Signin');
+        handlein.focus();
+        var appholder = document.getElementById('appholder');
+        var signin = document.getElementById('signin');
+        var signedIn = false;
+
+        var input = document.getElementById('handle-Signin');
+        input.placeholder = 'enter username';
+        var text = signin.querySelector('h1');
+        text.innerText = 'Welcome To Chat, please enter a name or press guest';
+
+        var signInEnter = function signInEnter(e) {
+            if (e.key == 'Enter') {
+                var signinSubmitel = document.getElementById('signin-submit');
+                signinSubmitel.click();
+            }
+        };
+        document.addEventListener('keypress', signInEnter);
+
+        var signinClickHandle = function signinClickHandle() {
+            document.removeEventListener('keypress', signInEnter);
+            console.log('login attempt', handlein.value);
+            var handle = handlein.value.replace(/\s+/g, '');
+            console.log(authSeq);
+            handlein.value = '';
+            authSeq(handle, store);
+            signinSubmit.removeEventListener('click', signinClickHandle);
+        };
+        signinSubmit.addEventListener('click', signinClickHandle);
+    };
+};
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
