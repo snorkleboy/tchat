@@ -1,7 +1,7 @@
 require 'rack'
 require 'json'
 require 'net/http'
-
+require_relative '../../util/dbServerApi'
 # sample javascript fetch
 
 # var payload = {
@@ -27,23 +27,14 @@ module Chat
             @routes = routes=Rack::URLMap.new(
                 '/signup' =>lambda do |env|
                     req = Rack::Request.new(env)      
-
-                    begin
-                        params = JSON.parse(req.body.read)
-                        p ['api controller, post user',params]
-                        #set uri
-                        uri = URI.parse("http://localhost:6000/user")
-                        res = Net::HTTP.post_form(uri, params)
-
-                        if res.is_a?(Net::HTTPSuccess)
-                                [200, { 'Content-Type' => 'application/json' }, [res.body]]
-                        else
-                                [400, { 'Content-Type' => 'application/json' },[res.body]]
-                        end
-                        
-                    rescue => exception
-                        [400, { 'Content-Type' => 'application/json' },[ JSON.generate({'error'=>exception})]]
+                    p ['api controller', 'signup']
+                    res = postUser( JSON.parse(req.body.read))
+                    if res[0]
+                            [200, { 'Content-Type' => 'application/json' }, [res[1]]]
+                    else
+                            [400, { 'Content-Type' => 'application/json' },[res[1]]]
                     end
+
 
                 end,
 #  sample login fetch
