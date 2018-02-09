@@ -171,7 +171,6 @@ var startup = function startup() {
     guestSignIn.addEventListener('click', function () {
         (0, _API.guest)().then(function (res) {
             signinSubmit.removeEventListener('click', signinClickHandle);
-            document.removeEventListener('keypress', signInEnter);
             console.log(res);
             _auth2.default.finalize('guest', store);
         });
@@ -207,6 +206,8 @@ var Store = function Store() {
     this.userList = {};
     this.msgs = [];
     this.setRoom = this.setRoom.bind(this);
+    this.handleName = this.handleName.bind(this);
+    this.roomName = this.roomName.bind(this);
 };
 
 Store.prototype.setHandle = function (handle) {
@@ -221,6 +222,13 @@ Store.prototype.changeUserlist = function (rooms, userList) {
     this.userList = userList;
     this.rooms = rooms;
     this.ui.makeUserList(rooms);
+};
+
+Store.prototype.roomName = function () {
+    return this.room;
+};
+Store.prototype.handleName = function () {
+    return this.handle;
 };
 
 exports.default = Store;
@@ -276,11 +284,11 @@ authSeq.prototype.passwordSetup = function (handle, store) {
 authSeq.prototype.finalize = function (handle, store) {
     store.setHandle(handle.length > 1 ? handle : 'anon');
     store.signedIn = true;
-    (0, _WS2.default)(store);
     appholder.classList.remove('blur');
     signin.style.display = 'none';
     var signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
+    (0, _WS2.default)(store);
 };
 
 authSeq.prototype.changeToSignUp = function (handle, store) {
@@ -499,6 +507,8 @@ var UI = function () {
             if (!store.signedIn && e.key == 'Enter') {
                 var signinSubmitel = document.getElementById('signin-submit');
                 signinSubmitel.click();
+            } else if (store.signedIn) {
+                document.removeEventListener('keypress', signInEnter);
             }
         };
         document.addEventListener('keypress', signInEnter);

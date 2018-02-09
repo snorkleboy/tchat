@@ -33,11 +33,11 @@ authSeq.prototype.passwordSetup = function(handle,store){
 authSeq.prototype.finalize = function(handle,store){
     store.setHandle(handle.length > 1 ? handle : 'anon');
     store.signedIn = true;
-    WSmaker(store);
     appholder.classList.remove('blur');
     signin.style.display = 'none';
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
+    WSmaker(store);
 }
 
 authSeq.prototype.changeToSignUp = function(handle,store){

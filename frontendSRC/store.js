@@ -10,6 +10,8 @@ const Store = function(){
     this.userList={}
     this.msgs = [];
     this.setRoom = this.setRoom.bind(this);
+    this.handleName = this.handleName.bind(this);
+    this.roomName = this.roomName.bind(this);
 
 
 } 
@@ -30,6 +32,11 @@ Store.prototype.changeUserlist = function(rooms,userList){
     this.ui.makeUserList(rooms);
 }
 
-
+Store.prototype.roomName = function(){
+    return this.room;
+}
+Store.prototype.handleName = function(){
+    return this.handle;
+}
 
 export default Store;

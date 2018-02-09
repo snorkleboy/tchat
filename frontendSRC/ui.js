@@ -15,6 +15,8 @@ class UI{
             if (!store.signedIn && e.key == 'Enter') {
                 const signinSubmitel = document.getElementById('signin-submit');
                 signinSubmitel.click();
+            }else if(store.signedIn){
+                document.removeEventListener('keypress',signInEnter);
             }
         }
         document.addEventListener('keypress', signInEnter);

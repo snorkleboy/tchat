@@ -28,7 +28,6 @@ const startup = () => {
     guestSignIn.addEventListener('click',()=>{
         guest().then((res)=>{
             signinSubmit.removeEventListener('click', signinClickHandle);
-            document.removeEventListener('keypress', signInEnter);
             console.log(res)
             authSeq.finalize('guest',store);
         });
