@@ -230,8 +230,13 @@ var Store = function Store() {
     this.setRoom = this.setRoom.bind(this);
     this.handleName = this.handleName.bind(this);
     this.roomName = this.roomName.bind(this);
+    this.errors = [];
 };
 
+Store.prototype.setError = function (error) {
+    this.errors.push(error);
+    this.UI.displayError(error);
+};
 Store.prototype.setHandle = function (handle) {
     this.handle = handle;
     this.ui.makeName(handle);
@@ -432,13 +437,7 @@ var WSmaker = function WSmaker(store, token) {
             bottomizeScroll();
         } else {
             console.log('RECEIVED WS COMMAND', data.action, data.payload, data);
-            switch (data.action) {
-                case "userList":
-                    store.changeUserlist(data.payload.rooms, data.payload.userList);
-                    break;
-                default:
-                    console.log('unknown action', data);
-            }
+            controller(data);
         }
     };
 
@@ -495,7 +494,18 @@ var WSmaker = function WSmaker(store, token) {
         }));
     });
 };
-
+function controller(data) {
+    switch (data.action) {
+        case "userList":
+            store.changeUserlist(data.payload.rooms, data.payload.userList);
+            break;
+        case 'error':
+            store.setError(data.payload.error);
+            break;
+        default:
+            console.log('unknown action', data);
+    }
+}
 function bottomizeScroll() {
     var element = document.getElementById("messages");
     element.scrollTop = element.scrollHeight;
@@ -544,6 +554,11 @@ var UI = function () {
     }
 
     _createClass(UI, [{
+        key: 'displayError',
+        value: function displayError(error) {
+            console.log('display error', 'UI.js', error);
+        }
+    }, {
         key: 'makeName',
         value: function makeName(handle) {
             var username = document.getElementById('username');

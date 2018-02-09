@@ -49,7 +49,7 @@ module Chat
                         p '','clients connected:'
                         p [@clients.count,@clients.map{|client| client.name}]
                     else
-                        ws.send(JSON.generate({'error'=>"incorrect token"}))
+                        ws.send(JSON.generate({'action'=>'error','error'=>"incorrect token"}))
                         ws.close;
                     end
                     

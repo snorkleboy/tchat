@@ -12,11 +12,15 @@ const Store = function(){
     this.setRoom = this.setRoom.bind(this);
     this.handleName = this.handleName.bind(this);
     this.roomName = this.roomName.bind(this);
+    this.errors=[];
 
 
 } 
 
-
+Store.prototype.setError = function(error){
+    this.errors.push(error)
+    this.UI.displayError(error);
+}
 Store.prototype.setHandle = function(handle){
     this.handle = handle
     this.ui.makeName(handle);

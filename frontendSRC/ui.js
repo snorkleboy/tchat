@@ -23,7 +23,9 @@ class UI{
 
         
     }
-
+    displayError(error){
+        console.log('display error','UI.js',error);
+    }
     makeName(handle){
         const username = document.getElementById('username');
         username.innerHTML = `<h1>${handle}</h1>`

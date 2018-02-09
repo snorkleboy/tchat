@@ -26,13 +26,7 @@ const WSmaker = (store,token) =>{
             bottomizeScroll();
         }else{
             console.log('RECEIVED WS COMMAND',data.action,data.payload,data)
-            switch(data.action){
-                case "userList":
-                    store.changeUserlist(data.payload.rooms,data.payload.userList);
-                    break;
-                default:
-                    console.log('unknown action',data)
-            }
+            controller(data)
         }
         
     };
@@ -96,7 +90,19 @@ const WSmaker = (store,token) =>{
     })
 
 };
+function controller(data){
+    switch (data.action) {
+        case "userList":
+            store.changeUserlist(data.payload.rooms, data.payload.userList);
+            break;
+        case 'error':
+            store.setError(data.payload.error);
+            break;
+        default:
+            console.log('unknown action', data)
+    }
 
+}
 function bottomizeScroll() {
     var element = document.getElementById("messages");
     element.scrollTop = element.scrollHeight;
