@@ -60,11 +60,123 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+
+var WSmaker = function WSmaker(store, token) {
+    // console.log('loaded');
+    var subBtn = document.getElementById('submit');
+    var handle = store.handle;
+    var input = document.getElementById('chatin');
+    input.focus();
+    var messageBox = document.getElementById('messageBox');
+
+    var roomChangeInput = document.getElementById('roomChangeInput');
+    var roomChangeButton = document.getElementById('roomChangeButton');
+
+    var scheme = "ws://";
+    var uri = scheme + window.document.location.host + "/" + handle + '/' + token;
+    var ws = new WebSocket(uri);
+
+    ws.onmessage = function (msg) {
+        var data = JSON.parse(msg.data);
+        if (data.action === 'msg') {
+            var msgEl = document.createElement('li');
+            msgEl.innerHTML = '\n        <h1>' + data.handle + ': ' + data.text + '</h1>\n        ';
+            messageBox.appendChild(msgEl);
+            bottomizeScroll();
+        } else {
+            console.log('RECEIVED WS COMMAND', data.action, data.payload, data);
+            controller(data, store);
+        }
+    };
+
+    ws.onerror = function (err) {
+        console.log('web socket error', err);
+    };
+
+    ws.onclose = function (e) {
+        console.log('websocket closing', e);
+    };
+
+    ws.onopen = function (e) {};
+
+    // send message
+    subBtn.addEventListener('click', function (e) {
+
+        e.preventDefault();
+        var text = input.value;
+
+        console.log('submit clicked', handle, text);
+
+        ws.send(JSON.stringify({
+            action: 'msg',
+            room: store.roomName(),
+            handle: handle,
+            text: text
+        }));
+
+        var msgEl = document.createElement('li');
+        msgEl.innerHTML = '\n        <h1>' + handle + ': ' + text + '</h1>\n        ';
+        msgEl.classList.add('myMessage');
+        messageBox.appendChild(msgEl);
+        bottomizeScroll();
+
+        input.value = "";
+        input.select();
+    });
+    //send message by pressing enter
+    document.addEventListener('keypress', function (e) {
+        if (e.key == 'Enter') {
+            subBtn.click();
+        }
+    });
+
+    //change rooms
+    roomChangeButton.addEventListener('click', function (e) {
+        store.setRoom(roomChangeInput.value);
+        roomChangeInput.value = '';
+        ws.send(JSON.stringify({
+            action: 'roomChange',
+            payload: {
+                room: store.room
+            }
+        }));
+    });
+};
+function controller(data, store) {
+    switch (data.action) {
+        case "userList":
+            store.changeUserlist(data.payload.rooms, data.payload.userList);
+            break;
+        case 'error':
+            store.setError(data.payload.error);
+            break;
+        default:
+            console.log('unknown action', data);
+    }
+}
+function bottomizeScroll() {
+    var element = document.getElementById("messages");
+    element.scrollTop = element.scrollHeight;
+}
+
+exports.default = WSmaker;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -80,7 +192,7 @@ Object.defineProperty(exports, "__esModule", {
 // };
 
 var login = exports.login = function login(payload) {
-    return fetch("http://localhost:3000/api/login", {
+    return fetch("api/login", {
         method: "POST",
         body: JSON.stringify(payload)
     }).then(function (res) {
@@ -95,7 +207,7 @@ var login = exports.login = function login(payload) {
 };
 
 var signup = exports.signup = function signup(payload) {
-    return fetch("http://localhost:3000/api/signup", {
+    return fetch("api/signup", {
         method: "POST",
         body: JSON.stringify(payload)
     }).then(function (res) {
@@ -110,7 +222,7 @@ var signup = exports.signup = function signup(payload) {
 };
 
 var guest = exports.guest = function guest() {
-    return fetch("http://localhost:3000/api/login", {
+    return fetch("api/login", {
         method: "POST",
         body: JSON.stringify({ 'username': 'guest', 'password': 'password' })
     }).then(function (res) {
@@ -124,7 +236,7 @@ var guest = exports.guest = function guest() {
     });
 };
 var isUser = exports.isUser = function isUser(payload) {
-    return fetch("http://localhost:3000/api/isuser", {
+    return fetch("api/isuser", {
         method: "POST",
         body: JSON.stringify(payload)
     }).then(function (res) {
@@ -133,7 +245,7 @@ var isUser = exports.isUser = function isUser(payload) {
 };
 
 var auth = function auth() {
-    return fetch("http://localhost:3000/api/login", {
+    return fetch("api/login", {
         method: "POST",
         body: JSON.stringify(payload)
         //auth headers  //  // headers: new Headers({ 'authentication': 'jwt start' })
@@ -145,23 +257,23 @@ var auth = function auth() {
 };
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _store = __webpack_require__(2);
+var _store = __webpack_require__(3);
 
 var _store2 = _interopRequireDefault(_store);
 
-var _WS = __webpack_require__(4);
+var _WS = __webpack_require__(0);
 
 var _WS2 = _interopRequireDefault(_WS);
 
-var _API = __webpack_require__(0);
+var _API = __webpack_require__(1);
 
-var _auth = __webpack_require__(3);
+var _auth = __webpack_require__(5);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -194,7 +306,7 @@ var startup = function startup() {
         }, function (error) {
             var text = document.getElementById('signin').querySelector('h1');
             console.log(error);
-            text.innerText = '' + error.error;
+            text.innerText = '' + error;
         });
     });
 };
@@ -202,7 +314,7 @@ var startup = function startup() {
 document.addEventListener('DOMContentLoaded', startup);
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -212,7 +324,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _ui = __webpack_require__(5);
+var _ui = __webpack_require__(4);
 
 var _ui2 = _interopRequireDefault(_ui);
 
@@ -261,7 +373,7 @@ Store.prototype.handleName = function () {
 exports.default = Store;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -271,11 +383,125 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _WS = __webpack_require__(4);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var UI = function () {
+    function UI(store) {
+        _classCallCheck(this, UI);
+
+        this.store = store;
+
+        //makes room list collapseable on each room
+        document.getElementById('userlistLabel').addEventListener('click', function (e) {
+            document.querySelectorAll('.room').forEach(function (roomButton) {
+                roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
+            });
+        });
+
+        //binds enter to signinbutton at start
+        var signInEnter = function signInEnter(e) {
+            if (!store.signedIn && e.key == 'Enter') {
+                var signinSubmitel = document.getElementById('signin-submit');
+                signinSubmitel.click();
+            } else if (store.signedIn) {
+                document.removeEventListener('keypress', signInEnter);
+            }
+        };
+        document.addEventListener('keypress', signInEnter);
+    }
+
+    _createClass(UI, [{
+        key: 'displayError',
+        value: function displayError(error) {
+            console.log('display error', 'UI.js', error);
+        }
+    }, {
+        key: 'makeName',
+        value: function makeName(handle) {
+            var username = document.getElementById('username');
+            username.innerHTML = '<h1>' + handle + '</h1>';
+        }
+    }, {
+        key: 'makeRoom',
+        value: function makeRoom(roomName) {
+            var roomname = document.getElementById('roomname');
+            document.getElementById('roomname').innerHTML = '<h1>' + roomName + '</h1>';
+        }
+    }, {
+        key: 'makeUserList',
+        value: function makeUserList(rooms) {
+            var userListEl = document.getElementById('userList');
+            userListEl.innerHTML = '';
+
+            var roomChangeInput = document.getElementById('roomChangeInput');
+            var roomChangeButton = document.getElementById('roomChangeButton');
+
+            Object.keys(rooms).forEach(function (room, i) {
+
+                //this is a li for a single room. It will have a collapse button and a list of users.  
+                var roomEl = document.createElement('li');
+                roomEl.innerHTML = '\n            <div>\n                <button \n                id=roomButton \n                data-room=' + room + '>\n                    ' + room + '\n                </button>\n                <button\n                data-room=' + room + ' \n                id=\'collapseRoom\'>\n                    [x]\n                </button>\n            </div>\n            ';
+                roomEl.classList.add('room');
+                //adds a collapse event to the roomels second button which collapses its user list
+                roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
+                    roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
+                });
+
+                //this is the list of users the roomEl will have
+                var roomElList = document.createElement('ul');
+                roomElList.classList.add('roomUserList');
+
+                roomEl.appendChild(roomElList);
+                userListEl.appendChild(roomEl);
+
+                //go through every user in this room and make a new li for them and append to the roomellist
+                rooms[room].forEach(function (user) {
+                    var li = document.createElement('li');
+                    li.innerHTML = '<button id=\'userButton\' data-name=' + user.name + '\'>' + user.name + '</button>';
+                    roomElList.appendChild(li);
+                });
+
+                //clicking on a roomname will make change the room by putting that roomname into the roomname change input element and clicking its submit button
+                document.querySelectorAll('#roomButton').forEach(function (button) {
+                    button.addEventListener('click', function (e) {
+                        roomChangeInput.value = button.dataset.room;
+                        roomChangeButton.click();
+                    });
+                });
+                //this is for clicking a username
+                //will later impliment direct messenging and freinds. 
+                document.querySelectorAll('#userButton').forEach(function (button) {
+                    button.addEventListener('click', function (e) {
+                        console.log(button.dataset.name);
+                    });
+                });
+            });
+        }
+    }]);
+
+    return UI;
+}();
+
+exports.default = UI;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _WS = __webpack_require__(0);
 
 var _WS2 = _interopRequireDefault(_WS);
 
-var _API = __webpack_require__(0);
+var _API = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -399,232 +625,6 @@ authSeq.prototype.signInInitialHandleMaker = function (store) {
 };
 var authseq = new authSeq();
 exports.default = authseq;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-
-var WSmaker = function WSmaker(store, token) {
-    // console.log('loaded');
-    var subBtn = document.getElementById('submit');
-    var handle = store.handle;
-    var input = document.getElementById('chatin');
-    input.focus();
-    var messageBox = document.getElementById('messageBox');
-
-    var roomChangeInput = document.getElementById('roomChangeInput');
-    var roomChangeButton = document.getElementById('roomChangeButton');
-
-    var scheme = "ws://";
-    var uri = scheme + window.document.location.host + "/" + handle + '/' + token;
-    var ws = new WebSocket(uri);
-
-    ws.onmessage = function (msg) {
-        var data = JSON.parse(msg.data);
-        if (data.action === 'msg') {
-            var msgEl = document.createElement('li');
-            msgEl.innerHTML = '\n        <h1>' + data.handle + ': ' + data.text + '</h1>\n        ';
-            messageBox.appendChild(msgEl);
-            bottomizeScroll();
-        } else {
-            console.log('RECEIVED WS COMMAND', data.action, data.payload, data);
-            controller(data, store);
-        }
-    };
-
-    ws.onerror = function (err) {
-        console.log('web socket error', err);
-    };
-
-    ws.onclose = function (e) {
-        console.log('websocket closing', e);
-    };
-
-    ws.onopen = function (e) {};
-
-    // send message
-    subBtn.addEventListener('click', function (e) {
-
-        e.preventDefault();
-        var text = input.value;
-
-        console.log('submit clicked', handle, text);
-
-        ws.send(JSON.stringify({
-            action: 'msg',
-            room: store.roomName(),
-            handle: handle,
-            text: text
-        }));
-
-        var msgEl = document.createElement('li');
-        msgEl.innerHTML = '\n        <h1>' + handle + ': ' + text + '</h1>\n        ';
-        msgEl.classList.add('myMessage');
-        messageBox.appendChild(msgEl);
-        bottomizeScroll();
-
-        input.value = "";
-        input.select();
-    });
-    //send message by pressing enter
-    document.addEventListener('keypress', function (e) {
-        if (e.key == 'Enter') {
-            subBtn.click();
-        }
-    });
-
-    //change rooms
-    roomChangeButton.addEventListener('click', function (e) {
-        store.setRoom(roomChangeInput.value);
-        roomChangeInput.value = '';
-        ws.send(JSON.stringify({
-            action: 'roomChange',
-            payload: {
-                room: store.room
-            }
-        }));
-    });
-};
-function controller(data, store) {
-    switch (data.action) {
-        case "userList":
-            store.changeUserlist(data.payload.rooms, data.payload.userList);
-            break;
-        case 'error':
-            store.setError(data.payload.error);
-            break;
-        default:
-            console.log('unknown action', data);
-    }
-}
-function bottomizeScroll() {
-    var element = document.getElementById("messages");
-    element.scrollTop = element.scrollHeight;
-}
-
-exports.default = WSmaker;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var UI = function () {
-    function UI(store) {
-        _classCallCheck(this, UI);
-
-        this.store = store;
-
-        //makes room list collapseable on each room
-        document.getElementById('userlistLabel').addEventListener('click', function (e) {
-            document.querySelectorAll('.room').forEach(function (roomButton) {
-                roomButton.classList.contains('collapse') ? roomButton.classList.remove('collapse') : roomButton.classList.add('collapse');
-            });
-        });
-
-        //binds enter to signinbutton at start
-        var signInEnter = function signInEnter(e) {
-            if (!store.signedIn && e.key == 'Enter') {
-                var signinSubmitel = document.getElementById('signin-submit');
-                signinSubmitel.click();
-            } else if (store.signedIn) {
-                document.removeEventListener('keypress', signInEnter);
-            }
-        };
-        document.addEventListener('keypress', signInEnter);
-    }
-
-    _createClass(UI, [{
-        key: 'displayError',
-        value: function displayError(error) {
-            console.log('display error', 'UI.js', error);
-        }
-    }, {
-        key: 'makeName',
-        value: function makeName(handle) {
-            var username = document.getElementById('username');
-            username.innerHTML = '<h1>' + handle + '</h1>';
-        }
-    }, {
-        key: 'makeRoom',
-        value: function makeRoom(roomName) {
-            var roomname = document.getElementById('roomname');
-            document.getElementById('roomname').innerHTML = '<h1>' + roomName + '</h1>';
-        }
-    }, {
-        key: 'makeUserList',
-        value: function makeUserList(rooms) {
-            var userListEl = document.getElementById('userList');
-            userListEl.innerHTML = '';
-
-            var roomChangeInput = document.getElementById('roomChangeInput');
-            var roomChangeButton = document.getElementById('roomChangeButton');
-
-            Object.keys(rooms).forEach(function (room, i) {
-
-                //this is a li for a single room. It will have a collapse button and a list of users.  
-                var roomEl = document.createElement('li');
-                roomEl.innerHTML = '\n            <div>\n                <button \n                id=roomButton \n                data-room=' + room + '>\n                    ' + room + '\n                </button>\n                <button\n                data-room=' + room + ' \n                id=\'collapseRoom\'>\n                    [x]\n                </button>\n            </div>\n            ';
-                roomEl.classList.add('room');
-                //adds a collapse event to the roomels second button which collapses its user list
-                roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
-                    roomEl.classList.contains('collapse') ? roomEl.classList.remove('collapse') : roomEl.classList.add('collapse');
-                });
-
-                //this is the list of users the roomEl will have
-                var roomElList = document.createElement('ul');
-                roomElList.classList.add('roomUserList');
-
-                roomEl.appendChild(roomElList);
-                userListEl.appendChild(roomEl);
-
-                //go through every user in this room and make a new li for them and append to the roomellist
-                rooms[room].forEach(function (user) {
-                    var li = document.createElement('li');
-                    li.innerHTML = '<button id=\'userButton\' data-name=' + user.name + '\'>' + user.name + '</button>';
-                    roomElList.appendChild(li);
-                });
-
-                //clicking on a roomname will make change the room by putting that roomname into the roomname change input element and clicking its submit button
-                document.querySelectorAll('#roomButton').forEach(function (button) {
-                    button.addEventListener('click', function (e) {
-                        roomChangeInput.value = button.dataset.room;
-                        roomChangeButton.click();
-                    });
-                });
-                //this is for clicking a username
-                //will later impliment direct messenging and freinds. 
-                document.querySelectorAll('#userButton').forEach(function (button) {
-                    button.addEventListener('click', function (e) {
-                        console.log(button.dataset.name);
-                    });
-                });
-            });
-        }
-    }]);
-
-    return UI;
-}();
-
-exports.default = UI;
 
 /***/ })
 /******/ ]);

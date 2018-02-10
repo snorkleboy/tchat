@@ -4,7 +4,7 @@
 //     password: 'passsssssss'
 // };
 
-export const login = (payload)=>fetch("http://localhost:3000/api/login",
+export const login = (payload)=>fetch("api/login",
         {
             method: "POST",
             body: JSON.stringify(payload),
@@ -17,7 +17,7 @@ export const login = (payload)=>fetch("http://localhost:3000/api/login",
             }
         }));
 
-export const signup = (payload) => fetch("http://localhost:3000/api/signup",
+export const signup = (payload) => fetch("api/signup",
     {
         method: "POST",
         body: JSON.stringify(payload),
@@ -30,7 +30,7 @@ export const signup = (payload) => fetch("http://localhost:3000/api/signup",
         }
     }));
 
-export const guest = () => fetch("http://localhost:3000/api/login",
+export const guest = () => fetch("api/login",
     {
         method: "POST",
         body: JSON.stringify({'username':'guest','password':'password'}),
@@ -42,14 +42,14 @@ export const guest = () => fetch("http://localhost:3000/api/login",
             throw new Error(data.error);
         }
     }));
-export const isUser = (payload) => fetch("http://localhost:3000/api/isuser",
+export const isUser = (payload) => fetch("api/isuser",
     {
         method: "POST",
         body: JSON.stringify(payload),
     })
     .then((res)=> res.json())
 
-const auth = ()=> fetch("http://localhost:3000/api/login",
+const auth = ()=> fetch("api/login",
     {
         method: "POST",
         body: JSON.stringify(payload),
