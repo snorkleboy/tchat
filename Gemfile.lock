@@ -9,6 +9,7 @@ GEM
     puma (3.11.2)
     rack (2.0.3)
     rake (12.3.0)
+    redis (4.0.1)
     sequel (5.5.0)
     websocket-driver (0.7.0)
       websocket-extensions (>= 0.1.0)
@@ -23,6 +24,7 @@ DEPENDENCIES
   puma
   rack
   rake
+  redis
   sequel
 
 BUNDLED WITH

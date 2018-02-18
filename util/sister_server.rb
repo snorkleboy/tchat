@@ -11,8 +11,6 @@ class SisterServer
 
     def start(proc)
         p 'sister_server_start'
-        p proc
-        p @server
         Thread.new(){
             Thread.current[:name]='Sister Listener'
             @SisterSocket.listen(1)
@@ -28,7 +26,6 @@ class SisterServer
     end
 
     def listen(proc)
-        p "sisterserver listen start, proc=#{proc}"
         while (msg = @client.gets)
             message = JSON.parse(msg)
             puts "sisterserver listen", message,msg,''
