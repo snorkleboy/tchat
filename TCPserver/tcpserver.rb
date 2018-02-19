@@ -114,8 +114,12 @@ class Server
                 # puts "#{user[:name]}: #{msg}"
                 if (msg[0] !="\\")             
                     begin
-                        msg = {'action'=>'msg','room'=>user[:room],'handle'=>user[:name],'text'=>msg}
-                        @redisAPI.publish(@redisAPI.message_channel, msg)
+                        @redisAPI.publish(@redisAPI.message_channel, {
+                            'action'=>'msg',
+                            'room'=>user[:room],
+                            'handle'=>user[:name],
+                            'text'=>msg
+                        })
                     rescue => exception
                         p '',"write error #{exception}",''
                     end
@@ -196,8 +200,10 @@ class Server
     # this is for sending a room list
     def sendUserList
         begin
-            msg = {'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}}
-            @redisAPI.publish(@redisAPI.room_channel,msg)
+            @redisAPI.publish(@redisAPI.room_channel,{
+                'action'=>'userList',
+                'payload'=>{'userList'=>@rooms.users(), 'rooms'=>@rooms.rooms}
+            })
         rescue => e
             p ['send userlist error',e]
         end

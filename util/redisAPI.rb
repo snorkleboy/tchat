@@ -15,8 +15,9 @@ class RedisApi
             redis_messages = newRedis()
             redis_messages.subscribe(MESSAGECHANNEL) do |on|
                 on.message do |channel, msg|
-                    p 'received message from redis on message channel',channel, msg,JSON.parse(msg)
-                    @sendMsgToClients.call(JSON.parse(msg))
+                    message = JSON.parse(msg)
+                    p 'received message from redis on message channel',message
+                    @sendMsgToClients.call(msg,message['room'])
                 end
             end
         end
@@ -25,8 +26,9 @@ class RedisApi
             redis_rooms = newRedis()
             redis_rooms.subscribe(ROOMCHANNEL) do |on|
                 on.message do |channel, msg|
-                    p 'received message from redis on room channel',channel, msg,JSON.parse(msg)
-                    @updateRooms.call(JSON.parse(msg)['payload']['rooms'])
+                    message = JSON.parse(msg)
+                    p 'received message from redis on room channel',message
+                    @updateRooms.call(message['payload']['rooms'])
                 end
             end
         end
