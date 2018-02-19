@@ -35,14 +35,9 @@ class Server
         @socket.bind(sockaddress)
 
         # redis setup
-        @redisAPI = RedisApi.new(self)
-        @redisAPI.publish(@redisAPI.room_channel,{'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
-        @redisAPI.publish(@redisAPI.message_channel,{'action'=>'msg','room'=>'aroom','handle'=>'auser','text'=>'word up homey'})
-        # starts sister server for connecting to other servers for messenging
-        # starts with a proc it uses to respond to messages anda reference to this server
-        @sisterServer = SisterServer.new(9009,'localhost',self)
-        messageallProc = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
-        @sisterServer.start(messageallProc)
+        messageClients = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
+        updateRooms = Proc.new{|newRooms| @rooms.newForeignRooms(newRooms)}
+        @redisAPI = RedisApi.new(messageClients,updateRooms)
 
         p "socket bound on #{host} #{port}"
         start()
@@ -197,14 +192,13 @@ class Server
             }
         end
     end
-    # this is for receiving a new room list
-    def newForeignUserlist(frooms)
-        @rooms.newForeignRooms(frooms)
-    end
+
     # this is for sending a room list
     def sendUserList
         begin
-            @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
+            msg = {'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}}
+            @redisAPI.publish(@redisAPI.room_channel,msg)
+            # @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
         rescue => e
             p ['send userlist error',e]
         end

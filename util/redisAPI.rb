@@ -3,9 +3,9 @@ require 'redis'
 class RedisApi
     MESSAGECHANNEL        = "messages"
     ROOMCHANNEL           = 'rooms'
-    def initialize(tcpserver)
-        @tcpserver = tcpserver
-        p ['REDISAPI',@TCPserver]
+    def initialize(sendMsgToClients,updateRooms)
+        @sendMsgToClients =sendMsgToClients
+        @updateRooms = updateRooms
 
         # uri      = URI.parse(ENV["REDISCLOUD_URL"])
         @redis   = newRedis()
@@ -15,8 +15,8 @@ class RedisApi
             redis_messages = newRedis()
             redis_messages.subscribe(MESSAGECHANNEL) do |on|
                 on.message do |channel, msg|
-                    # send message to clients
                     p 'received message from redis on message channel',channel, msg,JSON.parse(msg)
+                    @sendMsgToClients.call(JSON.parse(msg))
                 end
             end
         end
@@ -26,9 +26,7 @@ class RedisApi
             redis_rooms.subscribe(ROOMCHANNEL) do |on|
                 on.message do |channel, msg|
                     p 'received message from redis on room channel',channel, msg,JSON.parse(msg)
-                    # update rooms
-                    # p '','new user list', msg,''
-                    # @server.newForeignUserlist(msg['payload']['rooms'])
+                    @updateRooms.call(JSON.parse(msg)['payload']['rooms'])
                 end
             end
         end
@@ -39,8 +37,11 @@ class RedisApi
     def room_channel
         ROOMCHANNEL
     end
-    def newRedis()
-        Redis.new  #(host: uri.host, port: uri.port, password: uri.password)
+    def newRedis(uri = false)
+        uri ?
+            Redis(host: uri.host, port: uri.port, password: uri.password)
+        :
+            Redis.new  #(host: uri.host, port: uri.port, password: uri.password)
     end
     def receive_redis(response)
         response.call
