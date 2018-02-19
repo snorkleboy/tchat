@@ -114,8 +114,8 @@ class Server
                 # puts "#{user[:name]}: #{msg}"
                 if (msg[0] !="\\")             
                     begin
-                        write_room("#{user[:name]}: #{msg}", user)
-                        @sisterServer.send({'action'=>'msg','room'=>user[:room],'handle'=>user[:name],'text'=>msg})
+                        msg = {'action'=>'msg','room'=>user[:room],'handle'=>user[:name],'text'=>msg}
+                        @redisAPI.publish(@redisAPI.message_channel, msg)
                     rescue => exception
                         p '',"write error #{exception}",''
                     end
@@ -150,7 +150,7 @@ class Server
     def write_room(msg,originator, room =  nil)
         @rooms[room || originator.room].each do |user| 
             begin
-                user.client.puts(msg) 
+                user.client.puts(msg)
             rescue => exception
                 p '',"closing #{user}",''
                 user[:client].close
@@ -159,7 +159,7 @@ class Server
         end
     end
 
-    # starts up a console seperately from the listneing thread
+    # starts up a console seperately from the listening thread
     # lets you put in messages to see whats up with the server
     def start_console()
         thr = Thread.new() do
@@ -198,7 +198,6 @@ class Server
         begin
             msg = {'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}}
             @redisAPI.publish(@redisAPI.room_channel,msg)
-            # @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
         rescue => e
             p ['send userlist error',e]
         end
