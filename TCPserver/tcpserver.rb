@@ -35,9 +35,9 @@ class Server
         @socket.bind(sockaddress)
 
         # redis setup
-
         @redisAPI = RedisApi.new(self)
-
+        @redisAPI.publish(@redisAPI.room_channel,{'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
+        @redisAPI.publish(@redisAPI.message_channel,{'action'=>'msg','room'=>'aroom','handle'=>'auser','text'=>'word up homey'})
         # starts sister server for connecting to other servers for messenging
         # starts with a proc it uses to respond to messages anda reference to this server
         @sisterServer = SisterServer.new(9009,'localhost',self)
