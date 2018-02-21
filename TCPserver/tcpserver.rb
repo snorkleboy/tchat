@@ -6,7 +6,6 @@ require_relative "../util/sister_server"
 require_relative "../util/rooms"
 require 'json'
 require_relative "../util/dbServerApi"
-require_relative "../util/redisAPI"
 require_relative "./clientController"
 require_relative "./authenticationSequence"
 include Socket::Constants
@@ -33,10 +32,6 @@ class Server
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         sockaddress = Socket.pack_sockaddr_in(port,host)
         @socket.bind(sockaddress)
-
-        # redis setup
-
-        @redisAPI = RedisApi.new(self)
 
         # starts sister server for connecting to other servers for messenging
         # starts with a proc it uses to respond to messages anda reference to this server

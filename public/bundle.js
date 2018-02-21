@@ -442,7 +442,7 @@ var UI = function () {
 
                 //this is a li for a single room. It will have a collapse button and a list of users.  
                 var roomEl = document.createElement('li');
-                roomEl.innerHTML = '\n            <div>\n                <button \n                id=roomButton \n                data-room=' + room + '>\n                    ' + room + '\n                </button>\n                <button\n                data-room=' + room + ' \n                id=\'collapseRoom\'>\n                    [x]\n                </button>\n            </div>\n            ';
+                roomEl.innerHTML = '\n            <div>\n                <button \n                id=roomButton \n                data-room=' + room + '>\n                    ' + room + '\n                </button>\n                <button\n                data-room=' + room + ' \n                id=\'collapseRoom\'>\n                    &#10006\n                </button>\n            </div>\n            ';
                 roomEl.classList.add('room');
                 //adds a collapse event to the roomels second button which collapses its user list
                 roomEl.querySelector('#collapseRoom').addEventListener('click', function (e) {
