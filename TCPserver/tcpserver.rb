@@ -6,7 +6,6 @@ require_relative "../util/sister_server"
 require_relative "../util/rooms"
 require 'json'
 require_relative "../util/dbServerApi"
-require_relative "../util/redisAPI"
 require_relative "./clientController"
 require_relative "./authenticationSequence"
 include Socket::Constants
@@ -34,10 +33,11 @@ class Server
         sockaddress = Socket.pack_sockaddr_in(port,host)
         @socket.bind(sockaddress)
 
-        # redis setup
-        messageClients = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
-        updateRooms = Proc.new{|newRooms| @rooms.newForeignRooms(newRooms)}
-        @redisAPI = RedisApi.new(messageClients,updateRooms)
+        # starts sister server for connecting to other servers for messenging
+        # starts with a proc it uses to respond to messages anda reference to this server
+        @sisterServer = SisterServer.new(9009,'localhost',self)
+        messageallProc = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
+        @sisterServer.start(messageallProc)
 
         p "socket bound on #{host} #{port}"
         start()

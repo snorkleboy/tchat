@@ -48,11 +48,12 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: rgb(168, 231, 129);
+    background-color: white;
     box-sizing: border-box;
 }
 .info > div{
     display: flex;
+    
 }
 .info label{
     padding: 15px;
@@ -60,6 +61,14 @@
     display: flex;
     flex-direction: column;
     
+}
+.userInfo{
+    display: flex;
+    padding: 7px;
+    justify-content: center;
+}
+.userInfo div{
+    margin: 5px;
 }
 .info label h1{
     background-color: rgb(205, 250, 178);
@@ -75,4 +84,24 @@
 
 .collapse ul{
     display: none;
+}
+
+@media (max-width: 550px) {
+    .userInfo,
+    .userInfo div{
+        margin: 0px;
+        padding: 0px;
+        flex-direction: column;
+    }
+    #userlistLabel{
+        display: none;
+                margin: 0px;
+                padding: 0px;
+    }
+
+    #userList{
+        border: 0;
+                margin: 0px;
+                padding: 0px;
+    }
 }

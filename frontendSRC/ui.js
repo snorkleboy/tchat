@@ -55,7 +55,7 @@ class UI{
                 <button
                 data-room=${room} 
                 id='collapseRoom'>
-                    [x]
+                    &#10006
                 </button>
             </div>
             `
