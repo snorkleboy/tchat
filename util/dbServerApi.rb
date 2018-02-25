@@ -4,7 +4,7 @@ require 'net/http'
 
 def postUser(params)
     begin
-       p ['API controller','post user ',params]
+       p ['DBAPI controller','post user ',params]
         #set uri
         uri = URI.parse("http://localhost:6000/user")
         res = Net::HTTP.post_form(uri, params)
@@ -16,7 +16,7 @@ end
 
 def postSession(params)
     begin
-        p ['api controller, post session',params]
+        p ['DBAPI controller, post session',params]
         #set uri
         uri = URI.parse("http://localhost:6000/login")
         res = Net::HTTP.post_form(uri, params)
@@ -28,7 +28,7 @@ end
 
 def checkUser(params)
     begin
-        p ['api controller, user check',params]
+        p ['DBAPI controller, user check',params]
         #set uri
         uri = URI.parse("http://localhost:6000/isuser")
         res = Net::HTTP.post_form(uri, params)
@@ -39,7 +39,7 @@ def checkUser(params)
 end
 def tokenCheck(params)
     begin
-    p ['api controller, token check',params]
+    p ['DBAPI controller, token check',params]
     #set uri
     uri = URI.parse("http://localhost:6000/tokencheck")
     res = Net::HTTP.post_form(uri, params)
