@@ -15,12 +15,14 @@ class SisterServer
             Thread.current[:name]='Sister Listener'
             @SisterSocket.listen(1)
             p "sister server up and listening on #{@location}"
-            Thread.new(@SisterSocket.accept) do |connection| 
-                Thread.current[:name]="sister listener: #{connection}"
-                @client = connection[0]
-                p "SISTER SERVER ACCEPTED :#{connection}"
-                @connected = true
-                listen(proc)
+            while (true)
+                Thread.new(@SisterSocket.accept) do |connection| 
+                    Thread.current[:name]="sister listener: #{connection}"
+                    @client = connection[0]
+                    p "SISTER SERVER ACCEPTED :#{connection}"
+                    @connected = true
+                    listen(proc)
+                end
             end
         }
     end

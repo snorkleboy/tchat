@@ -31,7 +31,7 @@ const startup = () => {
             (res)=>{
                 signinSubmit.removeEventListener('click', signinClickHandle);
                 console.log(res)
-                authSeq.finalize('guest',store,res.token);
+                authSeq.finalize(res.username,store,res.token);
             },
             (error) => {
                 const text = document.getElementById('signin').querySelector('h1')

@@ -31,49 +31,61 @@ class Server
         # start main socket
         @socket = Socket.new(AF_INET, SOCK_STREAM, 0)
         sockaddress = Socket.pack_sockaddr_in(port,host)
-        @socket.bind(sockaddress)
+        begin
+            @socket.bind(sockaddress)
 
-        # starts sister server for connecting to other servers for messenging
-        # starts with a proc it uses to respond to messages anda reference to this server
-        @sisterServer = SisterServer.new(9009,'localhost',self)
-        messageallProc = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
-        @sisterServer.start(messageallProc)
+            # starts sister server for connecting to other servers for messenging
+            # starts with a proc it uses to respond to messages anda reference to this server
+            @sisterServer = SisterServer.new(9009,'localhost',self)
+            messageallProc = Proc.new{|msg| write_room("#{msg['handle']}: #{msg['text']}",nil,msg['room'])}
+            @sisterServer.start(messageallProc)
 
-        p "socket bound on #{host} #{port}"
-        start()
+            p "socket bound on #{host} #{port}"
+            start()
+        rescue => exception
+            p exception
+        end
     end
 
     # start starts up the socket to accept connections, 
     # puts each conection into a new thread where a authentication process ('handshake') is done
     # upon authentication it starts reading and writing to the socket
     def start
-        @socket.listen(5)
-        Thread.current[:name]='Main Listener'
-        p 'listening' 
-        start_console()
-        p 'console running'
-        # on connection put new socket into new thread
-        # thread does 'handshake' which gets username and password from TCP cleint
-        # If handshake returns a user object it reads and broadcasts messages from it, otherwise it closes the connection in handhsake and then kills the thread.
-        while(true) do
-            thr = Thread.start(@socket.accept) do |connection| 
-                user = nil
-                p '',"server accepted :#{connection}"
-                begin
-                    # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
-                    # if its not HTTP it welcomes to TCPChat and asks for a user name, then returns a userStruct(@socket,name)
-                    user = handshake(connection)   
-                rescue => exception
-                    p '',"handshake rescue: #{exception}"
-                    connection[0].puts exception
-                    connection[0].close
-                    user = false
-                end
-                if (user)
-                    thr[:name]=user[:name]
-                    read(user)
+        begin
+            @socket.listen(5)
+            Thread.current[:name]='Main Listener'
+            p 'listening' 
+            start_console()
+            p 'console running'
+            # on connection put new socket into new thread
+            # thread does 'handshake' which gets username and password from TCP cleint
+            # If handshake returns a user object it reads and broadcasts messages from it, otherwise it closes the connection in handhsake and then kills the thread.
+            while(true) do
+                thr = Thread.start(@socket.accept) do |connection| 
+                    user = nil
+                    p '',"server accepted :#{connection}"
+                    begin
+                        # hand shake looks at request, if its HTTP is sends response and returns false after closing the connection,
+                        # if its not HTTP it welcomes to TCPChat and asks for a user name, then returns a userStruct(@socket,name)
+                        user = handshake(connection)   
+                    rescue => exception
+                        p '',"handshake rescue: #{exception}"
+                        connection[0].puts exception
+                        connection[0].close
+                        user = false
+                    end
+                    if (user)
+                        thr[:name]=user[:name]
+                        read(user)
+                    end
                 end
             end
+        rescue => exception
+            p exception
+        ensure
+            p 'ensureing socket.close()'
+            @threads.each{|thr|thr.kill()} if @threads
+            @socket.close() if @socket
         end
     end
     # handshake gives a welcome message and gets a username and password, upon authentication it returns a user object
@@ -86,6 +98,14 @@ class Server
         # otherwise it creates an account
         while (!release)
             username = get_username(client)
+            if (username == 'guest')
+                loop do
+                    username = get_username(client) if !username
+                    username = guest(client)
+                    break if username
+                end
+                break
+            end
             registered = checkUser({'username'=>username})
             p '',registered,'registered',''
             registered = JSON.parse(registered[1])['isuser']

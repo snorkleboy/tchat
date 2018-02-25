@@ -1,6 +1,6 @@
 def get_username(client)
     while(true)
-        client.puts "please enter a username.to see who is on enter 's'"
+        client.puts "please enter a username.to see who is on enter 's'. To get on as a guest enter guest"
         msg = client.gets.chomp
         p "client username input: #{msg}"
         if (msg == 's')
@@ -41,6 +41,18 @@ def login(client,username,password)
     if (res[0])
         client.puts 'logged in!'
         return true
+    else
+        client.puts "error! #{res[1]}"
+        return false
+    end
+end
+
+def guest(client)
+    res = postSession({username:'guest',password:'password'})
+    if (res[0])
+        name = JSON.parse(res[1])['username']
+        client.puts "logged in as #{name}!"
+        return name
     else
         client.puts "error! #{res[1]}"
         return false

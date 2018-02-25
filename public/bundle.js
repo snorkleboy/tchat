@@ -302,7 +302,7 @@ var startup = function startup() {
         (0, _API.guest)().then(function (res) {
             signinSubmit.removeEventListener('click', signinClickHandle);
             console.log(res);
-            _auth2.default.finalize('guest', store, res.token);
+            _auth2.default.finalize(res.username, store, res.token);
         }, function (error) {
             var text = document.getElementById('signin').querySelector('h1');
             console.log(error);
