@@ -114,7 +114,8 @@ class Server
                 # puts "#{user[:name]}: #{msg}"
                 if (msg[0] !="\\")             
                     begin
-                        @redisAPI.publish(@redisAPI.message_channel, {
+                        write_room("#{user[:name]}: #{msg}", user)
+                        @sisterServer.send({
                             'action'=>'msg',
                             'room'=>user[:room],
                             'handle'=>user[:name],
@@ -200,9 +201,10 @@ class Server
     # this is for sending a room list
     def sendUserList
         begin
-            @redisAPI.publish(@redisAPI.room_channel,{
+            @sisterServer.send({
                 'action'=>'userList',
-                'payload'=>{'userList'=>@rooms.users(), 'rooms'=>@rooms.rooms}
+                'payload'=>{'userList'=>@rooms.users(),
+                'rooms'=>@rooms.rooms}
             })
         rescue => e
             p ['send userlist error',e]
