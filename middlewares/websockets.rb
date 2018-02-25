@@ -1,7 +1,5 @@
 require 'faye/websocket'
 require_relative "../util/sister_server"
-require_relative "../util/redisAPI"
-
 require 'json'
 require_relative "../util/rooms"
 
@@ -14,6 +12,7 @@ module Chat
             @usersList = [];
             @clients = []
             @rooms=Rooms.new(Proc.new{sendUserListToSister},Proc.new{sendUserListToClients})
+
             begin
                 @sisterClient = SisterClient.new(9009,'localhost', self)
             rescue => exception
@@ -27,11 +26,6 @@ module Chat
                 p exception
                 p '','couldnt connect to sister server',''
             end
-            # # redis setup
-            # messageClients = Proc.new{|msg| @rooms[msg['room']].each{|client| client.send(msg)}}
-            # updateRooms = Proc.new{|newRooms| @rooms.newForeignRooms(newRooms)}
-            # @redisAPI = RedisApi.new(messageClients,updateRooms)
-
         end
 
         def call(env)
@@ -67,7 +61,6 @@ module Chat
                     if (msg['action'] === 'msg')
                         @rooms[msg['room']].each{|client| client.send(event.data) unless client.ws==ws }
                         @sisterClient.send(msg)
-                        # @redis.publish(@redis.message_chanel,msg)
                     else
                         webSocketClientController(msg,wsClient)
                     end
@@ -111,7 +104,7 @@ module Chat
         end
 
         def sendUserListToSister
-            @redis.publish(@redis.message_chanel,{
+            @sisterClient.send({
                 'action'=>'userList',
                 'payload'=>{'userList'=>@clients,'rooms'=>@rooms.allRooms()}
             })
