@@ -65,6 +65,9 @@ class Server
                     user = handshake(connection)   
                 rescue => exception
                     p '',"handshake rescue: #{exception}"
+                    connection[0].puts exception
+                    connection[0].close
+                    user = false
                 end
                 if (user)
                     thr[:name]=user[:name]
@@ -168,7 +171,6 @@ class Server
     # lets you put in messages to see whats up with the server
     def start_console()
         thr = Thread.new() do
-            thr[:name]='console'
             loop {
                 cmd = $stdin.gets.chomp
                 if (/msg*/.match(cmd))
@@ -198,14 +200,14 @@ class Server
         end
     end
 
+    
+    def newForeignUserlist(frooms)
+        @rooms.newForeignRooms(frooms)
+    end
     # this is for sending a room list
     def sendUserList
         begin
-            @sisterServer.send({
-                'action'=>'userList',
-                'payload'=>{'userList'=>@rooms.users(),
-                'rooms'=>@rooms.rooms}
-            })
+            @sisterServer.send({'action'=>'userList','payload'=>{'userList'=>@rooms.users(),'rooms'=>@rooms.rooms}})
         rescue => e
             p ['send userlist error',e]
         end
