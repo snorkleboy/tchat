@@ -14,11 +14,23 @@ module Chat
             @usersList = [];
             @clients = []
             @rooms=Rooms.new(Proc.new{sendUserListToSister},Proc.new{sendUserListToClients})
-
-            # redis setup
-            messageClients = Proc.new{|msg| @rooms[msg['room']].each{|client| client.send(msg)}}
-            updateRooms = Proc.new{|newRooms| @rooms.newForeignRooms(newRooms)}
-            @redisAPI = RedisApi.new(messageClients,updateRooms)
+            begin
+                @sisterClient = SisterClient.new(9009,'localhost', self)
+            rescue => exception
+                p '',[exception,'sister client not connected'],''
+            end
+            
+            @msgAllProc = Proc.new{|msg,room| @rooms[room].each{|client| client.send(msg)}}
+            begin
+                @sisterClient.open(@msgAllProc)
+            rescue => exception
+                p exception
+                p '','couldnt connect to sister server',''
+            end
+            # # redis setup
+            # messageClients = Proc.new{|msg| @rooms[msg['room']].each{|client| client.send(msg)}}
+            # updateRooms = Proc.new{|newRooms| @rooms.newForeignRooms(newRooms)}
+            # @redisAPI = RedisApi.new(messageClients,updateRooms)
 
         end
 
@@ -53,8 +65,9 @@ module Chat
                     msg = JSON.parse(event.data)
                     p '',['websocket message event', msg],''
                     if (msg['action'] === 'msg')
-                        # @rooms[msg['room']].each{|client| client.send(event.data) unless client.ws==ws }
-                        @redis.publish(@redis.message_chanel,msg)
+                        @rooms[msg['room']].each{|client| client.send(event.data) unless client.ws==ws }
+                        @sisterClient.send(msg)
+                        # @redis.publish(@redis.message_chanel,msg)
                     else
                         webSocketClientController(msg,wsClient)
                     end
