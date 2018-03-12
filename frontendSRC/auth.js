@@ -1,25 +1,30 @@
-
 import WSmaker from './WS';
-import { login, signup, isUser } from './API'
+import {
+    login,
+    signup,
+    isUser
+} from './API'
 
 const diffUserButton = document.createElement('input')
 
-const authSeq = function(){
+const authSeq = function () {
     this.passwordSetup = this.passwordSetup.bind(this);
     this.changeToLogin = this.changeToLogin.bind(this);
     this.changeToSignUp = this.changeToSignUp.bind(this);
 }
-authSeq.prototype.passwordSetup = function(handle,store){
-    isUser({"username":handle}).then((res) => {
+authSeq.prototype.passwordSetup = function (handle, store) {
+    isUser({
+        "username": handle
+    }).then((res) => {
         const signinButtons = document.getElementById('signin-buttons');
         const anotherUserButton = document.createElement('INPUT');
-        anotherUserButton.type='submit';
-        anotherUserButton.value='Another User';
-        anotherUserButton.id='anotherUserButton';
+        anotherUserButton.type = 'submit';
+        anotherUserButton.value = 'Another User';
+        anotherUserButton.id = 'anotherUserButton';
         anotherUserButton.addEventListener('click', this.signInInitialHandleMaker(store))
-        
+
         let a = signinButtons.appendChild(anotherUserButton);
-        console.log(signinButtons, anotherUserButton,a.parentElement);
+        console.log(signinButtons, anotherUserButton, a.parentElement);
         console.log('registered:', res.isuser);
         if (res.isuser) {
             this.changeToLogin(handle, store)
@@ -30,7 +35,7 @@ authSeq.prototype.passwordSetup = function(handle,store){
 
 }
 
-authSeq.prototype.finalize = function(handle,store,token){
+authSeq.prototype.finalize = function (handle, store, token) {
     // console.log(token.token);
     store.setHandle(handle.length > 1 ? handle : 'anon');
     store.setRoom('general');
@@ -39,35 +44,38 @@ authSeq.prototype.finalize = function(handle,store,token){
     signin.style.display = 'none';
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.parentElement.removeChild(signinSubmit);
-    WSmaker(store,token);
+    WSmaker(store, token);
 }
 
-authSeq.prototype.changeToSignUp = function(handle,store){
+authSeq.prototype.changeToSignUp = function (handle, store) {
     const input = document.getElementById('handle-Signin');
-    input.placeholder= 'enter Password';
+    input.placeholder = 'enter Password';
 
     const signin = document.getElementById('signin');
     const text = signin.querySelector('h1')
     text.innerText = `-${handle}- not registered, enter a password to create an account or press guest`
 
     const signinSubmit = document.getElementById('signin-submit');
-    signinSubmit.addEventListener('click',()=>{
+    signinSubmit.addEventListener('click', () => {
         console.log("signing", input.value)
-        signup({ username: handle, password: input.value })
-        .then(
-            (res)=>{
-                console.log(res)
-                this.finalize(handle,store,res.token);
-            },
-            (error)=>{
-                console.log('errorure:',error);
-                text.innerText = error;
-            });
+        signup({
+                username: handle,
+                password: input.value
+            })
+            .then(
+                (res) => {
+                    console.log(res)
+                    this.finalize(handle, store, res.token);
+                },
+                (error) => {
+                    console.log('errorure:', error);
+                    text.innerText = error;
+                });
     });
 
 }
 
-authSeq.prototype.changeToLogin = function(handle,store){
+authSeq.prototype.changeToLogin = function (handle, store) {
     const input = document.getElementById('handle-Signin');
     input.placeholder = 'enter Password';
 
@@ -78,36 +86,39 @@ authSeq.prototype.changeToLogin = function(handle,store){
     const signinSubmit = document.getElementById('signin-submit');
     signinSubmit.addEventListener('click', () => {
         console.log("login", input.value)
-        login({ username: handle, password: input.value })
-        .then(
-            (res)=>{
-                console.log('succesful login',res);
-                this.finalize(handle,store,res.token);
-            },
-            (error)=>{
-                console.log(error);
-                text.innerText = `${handle} - ${error}`;
-            });
+        login({
+                username: handle,
+                password: input.value
+            })
+            .then(
+                (res) => {
+                    console.log('succesful login', res);
+                    this.finalize(handle, store, res.token);
+                },
+                (error) => {
+                    console.log(error);
+                    text.innerText = `${handle} - ${error}`;
+                });
     });
 }
 
-authSeq.prototype.signInInitialHandleMaker = function(store){
-    return ()=>{
+authSeq.prototype.signInInitialHandleMaker = function (store) {
+    return () => {
         const anotherUserButton = document.getElementById('anotherUserButton');
         anotherUserButton.parentElement.removeChild(anotherUserButton);
 
         let signinSubmit = document.getElementById('signin-submit');
         const clone = signinSubmit.cloneNode();
-        signinSubmit.parentElement.replaceChild(clone,signinSubmit);
+        signinSubmit.parentElement.replaceChild(clone, signinSubmit);
         signinSubmit = clone;
         const handlein = document.getElementById('handle-Signin');
-        handlein.value='';
-        handlein.placeholder='enter unique username'
+        handlein.value = '';
+        handlein.placeholder = 'enter unique username'
         handlein.focus();
         const appholder = document.getElementById('appholder');
         const signin = document.getElementById('signin');
         let signedIn = false;
-        
+
         const text = signin.querySelector('h1')
         text.innerText = `Welcome To Chat, please enter a name or press guest`
 

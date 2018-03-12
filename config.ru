@@ -8,21 +8,18 @@ require './middlewares/controllers/apiController'
 #   # allow all origins in development
 #   allow do
 #     origins '*'
-#     resource '*', 
-#         :headers => :any, 
+#     resource '*',
+#         :headers => :any,
 #         :methods => [:get, :post, :delete, :put, :options]
 #   end
 # end
 
 use Chat::Websockets
 
-map "/api/" do
-    use Chat::APIController
+map '/api/' do
+  use Chat::APIController
 end
-use Rack::Static, :urls => [""],:root=> 'public', :index =>'index.html'
+use Rack::Static, urls: [''], root: 'public', index: 'index.html'
 # use fourOhFour
 
-run lambda {}
-
-
-
+run -> {}

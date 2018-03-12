@@ -1,5 +1,5 @@
-class UI{
-    constructor(store){
+class UI {
+    constructor(store) {
         this.store = store;
 
         //makes room list collapseable on each room
@@ -15,26 +15,26 @@ class UI{
             if (!store.signedIn && e.key == 'Enter') {
                 const signinSubmitel = document.getElementById('signin-submit');
                 signinSubmitel.click();
-            }else if(store.signedIn){
-                document.removeEventListener('keypress',signInEnter);
+            } else if (store.signedIn) {
+                document.removeEventListener('keypress', signInEnter);
             }
         }
         document.addEventListener('keypress', signInEnter);
 
-        
+
     }
-    displayError(error){
-        console.log('display error','UI.js',error);
+    displayError(error) {
+        console.log('display error', 'UI.js', error);
     }
-    makeName(handle){
+    makeName(handle) {
         const username = document.getElementById('username');
         username.innerHTML = `<h1>${handle}</h1>`
     }
-    makeRoom(roomName){
+    makeRoom(roomName) {
         const roomname = document.getElementById('roomname')
         document.getElementById('roomname').innerHTML = `<h1>${roomName}</h1>`
     }
-    makeUserList(rooms){
+    makeUserList(rooms) {
         const userListEl = document.getElementById('userList');
         userListEl.innerHTML = ''
 

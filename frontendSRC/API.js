@@ -1,24 +1,4 @@
-
-// var payloadd = {
-//     username: 'timlkjkh',
-//     password: 'passsssssss'
-// };
-
-export const login = (payload)=>fetch("api/login",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        })
-        .then((res)=>res.json().then((data)=>{
-            if (res.ok){
-                return data
-            }else{
-                throw new Error(data.error);
-            }
-        }));
-
-export const signup = (payload) => fetch("api/signup",
-    {
+export const login = (payload) => fetch("api/login", {
         method: "POST",
         body: JSON.stringify(payload),
     })
@@ -30,10 +10,9 @@ export const signup = (payload) => fetch("api/signup",
         }
     }));
 
-export const guest = () => fetch("api/login",
-    {
+export const signup = (payload) => fetch("api/signup", {
         method: "POST",
-        body: JSON.stringify({'username':'guest','password':'password'}),
+        body: JSON.stringify(payload),
     })
     .then((res) => res.json().then((data) => {
         if (res.ok) {
@@ -42,20 +21,35 @@ export const guest = () => fetch("api/login",
             throw new Error(data.error);
         }
     }));
-export const isUser = (payload) => fetch("api/isuser",
-    {
+
+export const guest = () => fetch("api/login", {
+        method: "POST",
+        body: JSON.stringify({
+            'username': 'guest',
+            'password': 'password'
+        }),
+    })
+    .then((res) => res.json().then((data) => {
+        if (res.ok) {
+            return data
+        } else {
+            throw new Error(data.error);
+        }
+    }));
+export const isUser = (payload) => fetch("api/isuser", {
         method: "POST",
         body: JSON.stringify(payload),
     })
-    .then((res)=> res.json())
+    .then((res) => res.json())
 
-const auth = ()=> fetch("api/login",
-    {
+const auth = () => fetch("api/login", {
         method: "POST",
         body: JSON.stringify(payload),
-    //auth headers  //  // headers: new Headers({ 'authentication': 'jwt start' })
+        //auth headers  //  // headers: new Headers({ 'authentication': 'jwt start' })
     })
-    .then(function (res) { return res.json(); })
-    .then(function (data) { console.log(JSON.stringify(data)) })
-
-
+    .then(function (res) {
+        return res.json();
+    })
+    .then(function (data) {
+        console.log(JSON.stringify(data))
+    })
